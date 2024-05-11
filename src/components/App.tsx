@@ -26,7 +26,7 @@ const theme = createTheme({
 export const App: React.FC = () => {
     return (
         <MantineProvider theme={theme}>
-            <FetchWithProgress url={"/assets/yocto-3.1.33.zip"}/>
+            <FetchWithProgress url={"assets/yocto-3.1.33.zip"}/>
         </MantineProvider>
     );
 };
