@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from "react";
 
 
-import { MantineProvider, createTheme, MantineColorsTuple } from '@mantine/core';
+import {createTheme, MantineColorsTuple, MantineProvider} from '@mantine/core';
 import FetchWithProgress from "./FetchWithProgress";
-import PyodideLoader from "./PyodideLoader";
-import pyodide from "pyodide";
 import AceEditor from "react-ace";
+import "ace-builds/src-noconflict/mode-jsx";
+import {usePyodide} from "../usePyodide";
 
 const myColor: MantineColorsTuple = [
     '#e4f8ff',
@@ -28,22 +28,24 @@ const theme = createTheme({
 
 const Inner: React.FC = () => {
     const [data, setData] = useState<ArrayBuffer | null>(null);
-    const [pyodideModule, setPyodideModule] = useState<pyodide | null>(null);
+
+    const pyodide = usePyodide();
+
     const [ran, setRan] = useState<boolean>(false);
 
     useEffect(() => {
         const go = async () => {
-            if (data && pyodideModule && !ran) {
+            if (data && !ran) {
                 setRan(true);
 
                 console.warn("LOADING SQLITE");
-                await pyodideModule.loadPackage("sqlite3");
+                await pyodide.loadPackage("sqlite3");
                 console.warn("LOADED!");
 
-                pyodideModule.unpackArchive(data, "zip", {
+                pyodide.unpackArchive(data, "zip", {
                     extractDir: "bb"
                 });
-                pyodideModule.runPython(`
+                pyodide.runPython(`
 import os.path
 import sys
 from importlib.abc import Loader, MetaPathFinder
@@ -153,16 +155,16 @@ sys.meta_path.append(BuiltinImporterShim())
 
 print(sys.meta_path)
         `)
-                const file = pyodideModule.FS.readdir("./bb");
+                const file = pyodide.FS.readdir("./bb");
                 console.log(file);
 
-                pyodideModule.runPython(`
+                pyodide.runPython(`
                     import sys
                     sys.path.insert(0, "./bb/bitbake-2.8.0/lib/")
                     from bb.data_smart import DataSmart    
                 `)
 
-                const DataSmart = pyodideModule.globals.get('DataSmart');
+                const DataSmart = pyodide.globals.get('DataSmart');
                 const d = DataSmart();
 
                 d.setVar("A", "B");
@@ -175,16 +177,15 @@ print(sys.meta_path)
                 DataSmart.destroy();
 
             } else {
-                console.warn(`data = ${!!data}, p = ${!!pyodideModule}`);
+                console.warn(`data = ${!!data}, p = ${!!pyodide}`);
             }
         }
 
         go();
-    }, [data, pyodideModule, ran, setRan]);
+    }, [data, pyodide, ran, setRan]);
 
 
     return <>
-        <PyodideLoader pyodide={pyodideModule} setPyodide={setPyodideModule} />
         <FetchWithProgress url={"assets/bitbake-2.8.0.zip"} data={data} setData={setData}/>
     </>;
 }
@@ -197,7 +198,7 @@ export const App: React.FC = () => {
                 mode="java"
                 theme="github"
                 name="UNIQUE_ID_OF_DIV"
-                editorProps={{ $blockScrolling: true }}
+                editorProps={{$blockScrolling: true}}
             />
             <Inner/>
         </MantineProvider>
