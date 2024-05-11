@@ -4,6 +4,7 @@ import webpack from "webpack";
 import WebpackAssetsManifest from "webpack-assets-manifest";
 import path from "path";
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
 
 const OUTPUT_PATH = './dist/';
 
@@ -57,6 +58,11 @@ module.exports = (env: any, argv: any) => {
             new HtmlWebpackPlugin({
                 filename: path.resolve(OUTPUT_PATH, "index.html"),
                 template: "src/index.html.ejs"
+            }),
+            new CopyWebpackPlugin({
+                patterns: [
+                    { from: path.resolve(__dirname, 'assets/'), to: 'assets' }
+                ]
             })
         ],
 
