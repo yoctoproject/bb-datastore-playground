@@ -28,10 +28,13 @@ const theme = createTheme({
 export const App: React.FC = () => {
     const [data, setData] = useState<ArrayBuffer | null>(null);
     const [pyodideModule, setPyodideModule] = useState<pyodide | null>(null);
+    const [ran, setRan] = useState<boolean>(false);
 
     useEffect(() => {
         const go = async () => {
-            if (data && pyodideModule) {
+            if (data && pyodideModule && !ran) {
+                setRan(true);
+
                 console.warn("LOADING SQLITE");
                 await pyodideModule.loadPackage("sqlite3");
                 console.warn("LOADED!");
@@ -176,7 +179,7 @@ print(sys.meta_path)
         }
 
         go();
-    }, [data, pyodideModule]);
+    }, [data, pyodideModule, ran, setRan]);
 
     return (
         <MantineProvider theme={theme}>

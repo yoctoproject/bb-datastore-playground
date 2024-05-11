@@ -13,6 +13,7 @@ const PyodideLoader: React.FC<Props> = (props: Props) => {
             // noinspection TypeScriptCheckImport
             const { loadPyodide: loadPyodideModule } = await import("https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.mjs");
             const pyodideInstance: pyodide = await loadPyodideModule();
+            console.log("set pyodide");
             props.setPyodide(pyodideInstance);
         }
 

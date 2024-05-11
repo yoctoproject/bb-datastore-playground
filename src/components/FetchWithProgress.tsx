@@ -53,6 +53,7 @@ const FetchWithProgress: React.FC<FetchProgressProps> = (props: FetchProgressPro
             })
             .then(response => response.arrayBuffer())
             .then(async buffer => {
+                console.log("set buffer");
                 props.setData(buffer);
                 setLoading(false);
             })
