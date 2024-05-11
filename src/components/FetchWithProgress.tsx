@@ -15,13 +15,16 @@ const FetchWithProgress: React.FC<FetchProgressProps> = (props: FetchProgressPro
 
     const fetchData = () => {
         async function work() {
+            setLoading(true);
             const ret = await axios.get(props.url, {
                 onDownloadProgress: progressEvent => {
                     const percentage = Math.round(progressEvent.loaded * 100) / progressEvent.total;
+                    console.log(percentage);
                     setProgress(percentage);
                 },
                 responseType: "arraybuffer"
             });
+            setLoading(false);
 
             props.setData(ret.data);
         }
