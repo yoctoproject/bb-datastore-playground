@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 
+
 interface FetchProgressProps {
     url: string;
+    data: ArrayBuffer | null;
+    setData: (value: ArrayBuffer) => void,
 }
 
-const FetchWithProgress: React.FC<FetchProgressProps> = ({ url }) => {
+const FetchWithProgress: React.FC<FetchProgressProps> = (props: FetchProgressProps) => {
     const [progress, setProgress] = useState<number>(0);
-    const [data, setData] = useState<ArrayBuffer | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
     const fetchData = () => {
         setLoading(true);
         setError(null);
-        fetch(url)
+        fetch(props.url)
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -50,22 +52,23 @@ const FetchWithProgress: React.FC<FetchProgressProps> = ({ url }) => {
                 return new Response(stream, { headers: { "Content-Type": "application/octet-stream" } });
             })
             .then(response => response.arrayBuffer())
-            .then(buffer => {
-                setData(buffer);
+            .then(async buffer => {
+                props.setData(buffer);
                 setLoading(false);
             })
             .catch(err => {
                 setError(err.message);
+                console.error(err);
                 setLoading(false);
             });
     };
 
     return (
         <div>
-            <h1>Download Progress</h1>
+            <h4>Download Progress</h4>
             {loading && <p>Progress: {progress}%</p>}
             {error && <p>Error: {error}</p>}
-            {data && <p>Download complete!</p>}
+            {props.data && <p>Download complete!</p>}
             <button onClick={fetchData} disabled={loading}>
                 {loading ? 'Downloading...' : 'Start Download'}
             </button>

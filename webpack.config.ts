@@ -38,6 +38,7 @@ module.exports = (env: any, argv: any) => {
         entry: {
             'main': './src/index',
         },
+        target: ["web"],
 
         optimization: {
             splitChunks: {
@@ -50,6 +51,11 @@ module.exports = (env: any, argv: any) => {
             filename: "[name]-[contenthash].js",
             chunkFilename: "[name]-[contenthash].js",
             publicPath: PUBLIC_PATH,
+            environment: {
+                dynamicImport: true,
+                asyncFunction: true,
+            },
+            globalObject: 'globalThis',
         },
 
         plugins: [
@@ -63,7 +69,7 @@ module.exports = (env: any, argv: any) => {
                 patterns: [
                     { from: path.resolve(__dirname, 'assets/'), to: 'assets' }
                 ]
-            })
+            }),
         ],
 
         module: {
@@ -138,5 +144,10 @@ module.exports = (env: any, argv: any) => {
         watchOptions: {
             aggregateTimeout: 2000,
         },
+
+        externals: {
+            pyodide: 'pyodide'
+        },
+
     }
 }
