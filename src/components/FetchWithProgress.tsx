@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
+import axios from "axios";
 
 
 interface FetchProgressProps {
@@ -13,55 +14,19 @@ const FetchWithProgress: React.FC<FetchProgressProps> = (props: FetchProgressPro
     const [error, setError] = useState<string | null>(null);
 
     const fetchData = () => {
-        setLoading(true);
-        setError(null);
-        fetch(props.url)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const contentLength = response.headers.get('Content-Length');
-                if (!contentLength) {
-                    throw new Error("Missing Content-Length header.");
-                }
-                const total = parseInt(contentLength, 10);
-                let loaded = 0;
-
-                const reader = response.body!.getReader();
-                const stream = new ReadableStream({
-                    start(controller) {
-                        function push() {
-                            reader.read().then(({ done, value }) => {
-                                if (done) {
-                                    controller.close();
-                                    return;
-                                }
-                                loaded += value!.length;
-                                setProgress(Math.round((loaded / total) * 100));
-                                controller.enqueue(value);
-                                push();
-                            }).catch(err => {
-                                setError(`Error reading data: ${err.message}`);
-                                controller.error(err);
-                            });
-                        }
-                        push();
-                    }
-                });
-
-                return new Response(stream, { headers: { "Content-Type": "application/octet-stream" } });
-            })
-            .then(response => response.arrayBuffer())
-            .then(async buffer => {
-                console.log("set buffer");
-                props.setData(buffer);
-                setLoading(false);
-            })
-            .catch(err => {
-                setError(err.message);
-                console.error(err);
-                setLoading(false);
+        async function work() {
+            const ret = await axios.get(props.url, {
+                onDownloadProgress: progressEvent => {
+                    const percentage = Math.round(progressEvent.loaded * 100) / progressEvent.total;
+                    setProgress(percentage);
+                },
+                responseType: "arraybuffer"
             });
+
+            props.setData(ret.data);
+        }
+
+        work();
     };
 
     return (
