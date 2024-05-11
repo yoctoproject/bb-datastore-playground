@@ -5,6 +5,7 @@ import { MantineProvider, createTheme, MantineColorsTuple } from '@mantine/core'
 import FetchWithProgress from "./FetchWithProgress";
 import PyodideLoader from "./PyodideLoader";
 import pyodide from "pyodide";
+import AceEditor from "react-ace";
 
 const myColor: MantineColorsTuple = [
     '#e4f8ff',
@@ -25,7 +26,7 @@ const theme = createTheme({
     }
 });
 
-export const App: React.FC = () => {
+const Inner: React.FC = () => {
     const [data, setData] = useState<ArrayBuffer | null>(null);
     const [pyodideModule, setPyodideModule] = useState<pyodide | null>(null);
     const [ran, setRan] = useState<boolean>(false);
@@ -181,10 +182,24 @@ print(sys.meta_path)
         go();
     }, [data, pyodideModule, ran, setRan]);
 
+
+    return <>
+        <PyodideLoader pyodide={pyodideModule} setPyodide={setPyodideModule} />
+        <FetchWithProgress url={"assets/bitbake-2.8.0.zip"} data={data} setData={setData}/>
+    </>;
+}
+
+export const App: React.FC = () => {
+
     return (
         <MantineProvider theme={theme}>
-            <PyodideLoader pyodide={pyodideModule} setPyodide={setPyodideModule} />
-            <FetchWithProgress url={"assets/bitbake-2.8.0.zip"} data={data} setData={setData}/>
+            <AceEditor
+                mode="java"
+                theme="github"
+                name="UNIQUE_ID_OF_DIV"
+                editorProps={{ $blockScrolling: true }}
+            />
+            <Inner/>
         </MantineProvider>
     );
 };
