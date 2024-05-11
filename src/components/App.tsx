@@ -149,7 +149,7 @@ sys.meta_path.append(BuiltinImporterShim())
 
 print(sys.meta_path)
         `)
-                let file = pyodideModule.FS.readdir("./bb");
+                const file = pyodideModule.FS.readdir("./bb");
                 console.log(file);
 
                 pyodideModule.runPython(`
@@ -158,7 +158,7 @@ print(sys.meta_path)
                     from bb.data_smart import DataSmart    
                 `)
 
-                let DataSmart = pyodideModule.globals.get('DataSmart');
+                const DataSmart = pyodideModule.globals.get('DataSmart');
                 const d = DataSmart();
 
                 d.setVar("A", "B");
