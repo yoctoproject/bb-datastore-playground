@@ -1,11 +1,13 @@
 import React, {useEffect, useState} from "react";
 
 
-import {createTheme, MantineColorsTuple, MantineProvider} from '@mantine/core';
+import {AppShell, Burger, createTheme, MantineColorsTuple, MantineProvider} from '@mantine/core';
 import FetchWithProgress from "./FetchWithProgress";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-jsx";
 import {usePyodide} from "../usePyodide";
+import {useDisclosure} from "@mantine/hooks";
+import {useImmer} from "use-immer";
 
 const myColor: MantineColorsTuple = [
     '#e4f8ff',
@@ -29,14 +31,20 @@ const theme = createTheme({
 const Inner: React.FC = () => {
     const [data, setData] = useState<ArrayBuffer | null>(null);
 
-    const pyodide = usePyodide();
+    const {pyodide, status: pyodideStatus } = usePyodide();
 
     const [ran, setRan] = useState<boolean>(false);
+
+    const [output, setOutput] = useImmer<string[]>([]);
 
     useEffect(() => {
         const go = async () => {
             if (data && !ran) {
                 setRan(true);
+
+                pyodide.setStdout({
+                    batched: (msg) => setOutput(o => { o.push(msg); })
+                })
 
                 console.warn("LOADING SQLITE");
                 await pyodide.loadPackage("sqlite3");
@@ -187,20 +195,53 @@ print(sys.meta_path)
 
     return <>
         <FetchWithProgress url={"assets/bitbake-2.8.0.zip"} data={data} setData={setData}/>
+        <p>pyodide: {pyodideStatus}</p>
+        <ul>
+            {output.map(e => <li>{e}</li>)}
+        </ul>
     </>;
 }
 
 export const App: React.FC = () => {
+    const [opened, { toggle }] = useDisclosure();
 
     return (
         <MantineProvider theme={theme}>
-            <AceEditor
-                mode="java"
-                theme="github"
-                name="UNIQUE_ID_OF_DIV"
-                editorProps={{$blockScrolling: true}}
-            />
-            <Inner/>
+
+            <AppShell
+                header={{ height: 60 }}
+                navbar={{
+                    width: 300,
+                    breakpoint: 'sm',
+                    collapsed: { mobile: !opened },
+                }}
+                padding="md"
+            >
+                <AppShell.Header>
+                    <Burger
+                        opened={opened}
+                        onClick={toggle}
+                        hiddenFrom="sm"
+                        size="sm"
+                    />
+                    <div>Logo</div>
+                </AppShell.Header>
+
+                <AppShell.Navbar p="md">Navbar</AppShell.Navbar>
+
+                <AppShell.Main>
+
+
+                    <AceEditor
+                        mode="java"
+                        theme="github"
+                        name="UNIQUE_ID_OF_DIV"
+                        editorProps={{$blockScrolling: true}}
+                    />
+                    <Inner/>
+                </AppShell.Main>
+            </AppShell>
+
         </MantineProvider>
     );
 };
