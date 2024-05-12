@@ -36,6 +36,9 @@ export const JQueryTerminal: React.ForwardRefExoticComponent<React.PropsWithoutR
                 terminalObjectRef.current?.freeze(true);
                 terminalObjectRef.current?.set_prompt("");
             },
+            setPrompt: (prompt) => {
+                terminalObjectRef.current?.set_prompt(prompt);
+            },
             setInterpreter: (interpreter?: TypeOrArray<JQueryTerminal.Interpreter>) => {
                 if (terminalObjectRef.current) {
                     terminalObjectRef.current.set_interpreter(interpreter);

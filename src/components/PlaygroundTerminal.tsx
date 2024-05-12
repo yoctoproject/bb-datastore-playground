@@ -31,24 +31,16 @@ export const PlaygroundTerminal: React.FC = () => {
     }, [])
 
     useEffect(() => {
-        if (state.pyodideStatus === "idle") {
-            terminalRef.current.echo(`Pyodide: ${state.pyodideStatus}`);
-            terminalRef.current.echo(`Downloading bitbake: ${progress(state.bitbakeProgress, 80)}%`);
+        if (state.pyodideStatus !== "done unpacking") {
+            terminalRef.current.setPrompt(
+                `Downloading bitbake: ${progress(state.bitbakeProgress, 80)}%\nPyodide: ${state.pyodideStatus}`
+            )
+        } else {
+            terminalRef.current.setPrompt(
+                `Done unpacking BitBake`
+            )
         }
-
-        terminalRef.current.update(-1, `Pyodide: ${state.pyodideStatus}`);
-        terminalRef.current.update(-2, `Downloading bitbake: ${progress(state.bitbakeProgress, 80)}%`);
     }, [state]);
-    //
-    // useEffect(() => {
-    //     if (done && pyodide) {
-    //         terminalRef.current.echo("Unpacking BitBake...");
-    //         pyodide.unpackArchive(data, "zip", {
-    //             extractDir: "bb"
-    //         });
-    //         terminalRef.current.echo("Done!");
-    //     }
-    // }, [data, done, pyodide]);
 
     const interpreter = (command, term) => {
 
