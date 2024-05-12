@@ -1,24 +1,26 @@
 import {useEffect, useState} from 'react';
 
-import pyodide from "pyodide";
+import {PyodideInterface} from "pyodide";
 
-export const usePyodide = () => {
-    const [pyodide, setPyodide] = useState<pyodide>(null);
+let cachedInstance: PyodideInterface = null;
+
+export const usePyodide: () => { pyodide: PyodideInterface; status: string } = () => {
+    const [pyodide, setPyodide] = useState<PyodideInterface>(null);
     const [status, setStatus] = useState<string>('idle');
 
     useEffect(() => {
         let isActive = true;
 
         const loadPyodide = async () => {
-            if (!window.pyodide) {
+            if (!cachedInstance) {
                 setStatus("importing");
                 const { loadPyodide: loadPyodideModule } = await import("https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.mjs");
                 setStatus("loading");
-                window.pyodide = await loadPyodideModule();
+                cachedInstance = await loadPyodideModule();
                 setStatus("done");
             }
             if (isActive) {
-                setPyodide(window.pyodide);
+                setPyodide(cachedInstance);
             }
         };
 

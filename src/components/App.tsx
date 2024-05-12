@@ -3,11 +3,10 @@ import React, {useEffect, useState} from "react";
 
 import {AppShell, Burger, createTheme, MantineColorsTuple, MantineProvider} from '@mantine/core';
 import FetchWithProgress from "./FetchWithProgress";
-import AceEditor from "react-ace";
-import "ace-builds/src-noconflict/mode-jsx";
-import {usePyodide} from "../usePyodide";
+import {usePyodide} from "../hooks/usePyodide";
 import {useDisclosure} from "@mantine/hooks";
 import {useImmer} from "use-immer";
+import {PlaygroundTerminal} from "./PlaygroundTerminal";
 
 const myColor: MantineColorsTuple = [
     '#e4f8ff',
@@ -40,13 +39,9 @@ const Inner: React.FC = () => {
     useEffect(() => {
         const go = async () => {
             if (data && !ran) {
-                setRan(true);
-
-                pyodide.setStdout({
-                    batched: (msg) => setOutput(o => { o.push(msg); })
-                })
 
                 console.warn("LOADING SQLITE");
+
                 await pyodide.loadPackage("sqlite3");
                 console.warn("LOADED!");
 
@@ -183,6 +178,7 @@ print(sys.meta_path)
                 console.log(d.getVar("A"));
 
                 DataSmart.destroy();
+                setRan(true);
 
             } else {
                 console.warn(`data = ${!!data}, p = ${!!pyodide}`);
@@ -192,8 +188,9 @@ print(sys.meta_path)
         go();
     }, [data, pyodide, ran, setRan]);
 
-
     return <>
+        {/*{pyodide && data && ran && <TerminalComponent pyodide={pyodide}/>}*/}
+
         <FetchWithProgress url={"assets/bitbake-2.8.0.zip"} data={data} setData={setData}/>
         <p>pyodide: {pyodideStatus}</p>
         <ul>
@@ -207,7 +204,6 @@ export const App: React.FC = () => {
 
     return (
         <MantineProvider theme={theme}>
-
             <AppShell
                 header={{ height: 60 }}
                 navbar={{
@@ -230,15 +226,8 @@ export const App: React.FC = () => {
                 <AppShell.Navbar p="md">Navbar</AppShell.Navbar>
 
                 <AppShell.Main>
+                    <PlaygroundTerminal />
 
-
-                    <AceEditor
-                        mode="java"
-                        theme="github"
-                        name="UNIQUE_ID_OF_DIV"
-                        editorProps={{$blockScrolling: true}}
-                    />
-                    <Inner/>
                 </AppShell.Main>
             </AppShell>
 
