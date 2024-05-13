@@ -3,6 +3,7 @@ import * as $ from "jquery";
 import 'jquery.terminal';
 import 'jquery.terminal/css/jquery.terminal.min.css';
 import {terminal} from "jquery";
+import {usePyodide} from "../hooks/usePyodide";
 
 interface Props {
     interpreter?: TypeOrArray<JQueryTerminal.Interpreter>,
@@ -32,9 +33,8 @@ export const JQueryTerminal: React.ForwardRefExoticComponent<React.PropsWithoutR
             update: (line: number, str: string) => {
                 terminalObjectRef.current?.update(line, str);
             },
-            freeze: () => {
-                terminalObjectRef.current?.freeze(true);
-                terminalObjectRef.current?.set_prompt("");
+            freeze: (toggle?: boolean) => {
+                terminalObjectRef.current?.freeze(toggle);
             },
             setPrompt: (prompt) => {
                 terminalObjectRef.current?.set_prompt(prompt);

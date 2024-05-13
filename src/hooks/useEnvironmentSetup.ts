@@ -1,12 +1,26 @@
 import {useImmerReducer} from "use-immer";
-import {usePyodide} from "./usePyodide";
-import {useEffect} from "react";
+import {PyodideStatus, usePyodide} from "./usePyodide";
+import {useEffect, useRef} from "react";
 import {useSWRProgress} from "./useSWRProgress";
 
+export enum EnvironmentStatus {
+    WaitBitbakeOrPyodide,
+    LoadingSqlite3,
+    UnpackingBitbake,
+    Configuring,
+    ImportingBitbake,
+    Ready,
+}
 
+enum InternalStatus {
+    NotRun,
+    Running,
+    Done
+}
 
 const initialEnvironmentState = {
-    pyodideStatus: "idle",
+    environmentStatus: EnvironmentStatus.WaitBitbakeOrPyodide,
+    pyodideStatus: PyodideStatus.Idle,
     bitbakeProgress: 0
 };
 
@@ -18,6 +32,9 @@ function reducer(draft, action) {
         case "bitbakeProgressChanged":
             draft.bitbakeProgress = action.bitbakeProgress;
             return;
+        case "environmentStatusChanged":
+            draft.environmentStatus = action.environmentStatus;
+            break;
     }
 }
 
@@ -33,19 +50,21 @@ export const useEnvironmentSetup = () => {
 
     useEffect(() => {
         dispatch({type: "bitbakeProgressChanged", bitbakeProgress: progress});
-    }, [progress, dispatch]);
+    }, [dispatch, progress]);
+
+    const effectStatus = useRef<InternalStatus>(InternalStatus.NotRun);
 
     useEffect(() => {
-        if (pyodide && data) {
-            dispatch({type: "pyodideStatusChanged", pyodideStatus: "Loading sqlite3"});
+        if (pyodideStatus === PyodideStatus.Done && progress === 100 && effectStatus.current === InternalStatus.NotRun) {
+            effectStatus.current = InternalStatus.Running;
             const f = async() => {
+                dispatch({type: "environmentStatusChanged", environmentStatus: EnvironmentStatus.LoadingSqlite3});
                 await pyodide.loadPackage("sqlite3");
-                dispatch({type: "pyodideStatusChanged", pyodideStatus: "done sqlite3"});
-                dispatch({type: "pyodideStatusChanged", pyodideStatus: "Unpacking..."});
+                dispatch({type: "environmentStatusChanged", pyodideStatus: EnvironmentStatus.UnpackingBitbake});
                 pyodide.unpackArchive(data, "zip", {
                     extractDir: "bb"
                 });
-                dispatch({type: "pyodideStatusChanged", pyodideStatus: "done unpacking"});
+                dispatch({type: "environmentStatusChanged", pyodideStatus: EnvironmentStatus.Configuring});
 
                 pyodide.runPython(`
 import os.path
@@ -157,31 +176,34 @@ sys.meta_path.append(BuiltinImporterShim())
 
 print(sys.meta_path)
         `)
-                const file = pyodide.FS.readdir("./bb");
-                console.log(file);
+                // const file = pyodide.FS.readdir("./bb");
+                // console.log(file);
 
+                dispatch({type: "environmentStatusChanged", environmentStatus: EnvironmentStatus.ImportingBitbake});
                 pyodide.runPython(`
                     import sys
                     sys.path.insert(0, "./bb/bitbake-2.8.0/lib/")
                     from bb.data_smart import DataSmart    
                 `)
 
-                const DataSmart = pyodide.globals.get('DataSmart');
-                const d = DataSmart();
-
-                d.setVar("A", "B");
-                d.setVar("A:test", "C");
-                d.setVar("OVERRIDES", "test");
-                d.setVarFlag("A", "p", "OK");
-
-                console.log(d.getVar("A"));
-
-                DataSmart.destroy();
+                dispatch({type: "environmentStatusChanged", environmentStatus: EnvironmentStatus.Ready});
+                // const DataSmart = pyodide.globals.get('DataSmart');
+                // const d = DataSmart();
+                //
+                // d.setVar("A", "B");
+                // d.setVar("A:test", "C");
+                // d.setVar("OVERRIDES", "test");
+                // d.setVarFlag("A", "p", "OK");
+                //
+                // console.log(d.getVar("A"));
+                //
+                // DataSmart.destroy();
             }
 
             f();
+            effectStatus.current = InternalStatus.Done;
         }
-    }, [data, dispatch, pyodide]);
+    }, [data, dispatch, progress, pyodide, pyodideStatus]);
 
-    return {state};
+    return {state, pyodide};
 };

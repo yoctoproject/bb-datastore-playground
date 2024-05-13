@@ -4,20 +4,28 @@ import {PyodideInterface} from "pyodide";
 
 let cachedInstance: PyodideInterface = null;
 
-export const usePyodide: () => { pyodide: PyodideInterface; status: string } = () => {
+export enum PyodideStatus {
+    Idle,
+    Fetching,
+    Loading,
+    Done,
+    Inactive,
+}
+
+export const usePyodide: () => { pyodide: PyodideInterface; status: PyodideStatus } = () => {
     const [pyodide, setPyodide] = useState<PyodideInterface>(null);
-    const [status, setStatus] = useState<string>('idle');
+    const [status, setStatus] = useState<PyodideStatus>(PyodideStatus.Idle);
 
     useEffect(() => {
         let isActive = true;
 
         const loadPyodide = async () => {
             if (!cachedInstance) {
-                setStatus("importing");
+                setStatus(PyodideStatus.Fetching);
                 const { loadPyodide: loadPyodideModule } = await import("https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.mjs");
-                setStatus("loading");
+                setStatus(PyodideStatus.Loading);
                 cachedInstance = await loadPyodideModule();
-                setStatus("done");
+                setStatus(PyodideStatus.Done);
             }
             if (isActive) {
                 setPyodide(cachedInstance);
@@ -27,7 +35,7 @@ export const usePyodide: () => { pyodide: PyodideInterface; status: string } = (
         loadPyodide();
 
         return () => {
-            setStatus("inactive");
+            setStatus(PyodideStatus.Inactive);
             isActive = false;
         };
     }, []);
