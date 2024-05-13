@@ -1,11 +1,7 @@
-import React, {useEffect, useState} from "react";
-
+import React from "react";
 
 import {AppShell, Burger, createTheme, MantineColorsTuple, MantineProvider} from '@mantine/core';
-import FetchWithProgress from "./FetchWithProgress";
-import {usePyodide} from "../hooks/usePyodide";
 import {useDisclosure} from "@mantine/hooks";
-import {useImmer} from "use-immer";
 import {PlaygroundTerminal} from "./PlaygroundTerminal";
 
 const myColor: MantineColorsTuple = [
@@ -27,52 +23,17 @@ const theme = createTheme({
     }
 });
 
-const Inner: React.FC = () => {
-    const [data, setData] = useState<ArrayBuffer | null>(null);
-
-    const {pyodide, status: pyodideStatus } = usePyodide();
-
-    const [ran, setRan] = useState<boolean>(false);
-
-    const [output, setOutput] = useImmer<string[]>([]);
-
-    useEffect(() => {
-        const go = async () => {
-            if (data && !ran) {
-
-                console.warn("LOADING SQLITE");
-
-
-            } else {
-                console.warn(`data = ${!!data}, p = ${!!pyodide}`);
-            }
-        }
-
-        go();
-    }, [data, pyodide, ran, setRan]);
-
-    return <>
-        {/*{pyodide && data && ran && <TerminalComponent pyodide={pyodide}/>}*/}
-
-        <FetchWithProgress url={"assets/bitbake-2.8.0.zip"} data={data} setData={setData}/>
-        <p>pyodide: {pyodideStatus}</p>
-        <ul>
-            {output.map(e => <li>{e}</li>)}
-        </ul>
-    </>;
-}
-
 export const App: React.FC = () => {
-    const [opened, { toggle }] = useDisclosure();
+    const [opened, {toggle}] = useDisclosure();
 
     return (
         <MantineProvider theme={theme}>
             <AppShell
-                header={{ height: 60 }}
+                header={{height: 60}}
                 navbar={{
                     width: 300,
                     breakpoint: 'sm',
-                    collapsed: { mobile: !opened },
+                    collapsed: {mobile: !opened},
                 }}
                 padding="md"
             >
@@ -89,8 +50,7 @@ export const App: React.FC = () => {
                 <AppShell.Navbar p="md">Navbar</AppShell.Navbar>
 
                 <AppShell.Main>
-                    <PlaygroundTerminal />
-
+                    <PlaygroundTerminal/>
                 </AppShell.Main>
             </AppShell>
 
