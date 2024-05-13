@@ -196,6 +196,14 @@ export const PlaygroundTerminal: React.FC = () => {
 
                         terminalRef.current.echo("Ready :)\n");
                         terminalRef.current.setPrompt(">>> ");
+                        terminalRef.current.exec("d = DataSmart()")
+                        terminalRef.current.exec(`d.setVar('P', 'Are you \${MOD} \${ADJ}')`);
+                        terminalRef.current.exec(`d.setVar('MOD', 'not')`);
+                        terminalRef.current.exec(`d.setVar('ADJ', 'enter')`);
+                        terminalRef.current.exec(`d.setVar('ADJ:append', 'tained')`);
+                        terminalRef.current.exec(`d.setVar('P:append', '?')`);
+                        terminalRef.current.exec(`print(d.expand("\${P}"))`);
+
                         terminalRef.current.freeze(false);
                     }
                     break;
