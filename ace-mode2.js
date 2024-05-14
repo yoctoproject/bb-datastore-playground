@@ -8,6 +8,8 @@ var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
 var PythonHighlightRules = require("./python_highlight_rules").PythonHighlightRules;
 
 var ShHighlightRules = function() {
+    const bitbakeIdentifierRegex = /[\w_][\w\.\-\+\{\}\$:]*/;
+
     this.$rules = {
         "start" : [
             {
@@ -17,6 +19,24 @@ var ShHighlightRules = function() {
                 next: "start"
             },
             {
+                // Varflag
+                token: ["paren.lparen", "constant.character", "paren.rparen"],
+                regex: /(\[)([-\w_+.]+)(\])/
+            },
+            {
+                // python task
+                token: "keyword",
+                regex: /python(?=\s|\()/,
+                next: "python_task",
+            },
+            {
+                // fakeroot task
+                token: "keyword",
+                regex: /fakeroot(?=\s)/,
+                next: "shell_task",
+            },
+            {
+                // def
                 token: "keyword",
                 regex: "def",
                 next: "python-def-start",
@@ -24,9 +44,57 @@ var ShHighlightRules = function() {
             {
                 token: "variable",
                 regex: "W",
+
             }
         ],
+        "python_task": [
+            {
+                token: "keyword",
+                regex: /fakeroot(?=\s)/
+            },
+            {
+                token: "entity.function",
+                regex: bitbakeIdentifierRegex,
+            },
+            {
+                token: "paren.lparen",
+                regex: /\(/,
+                push: [{
+                    token: "paren.rparen",
+                    regex: /\)/,
+                    next: "pop",
+                }]
+            },
+            {
+                token: "paren.lparen",
+                regex: /\{/,
+                next: "python-start",
+            }
+        ],
+        "shell_task": [
+            {
+                token: "entity.function",
+                regex: bitbakeIdentifierRegex,
+            },
+            {
+                token: "paren.lparen",
+                regex: /\(/,
+                push: [{
+                    token: "paren.rparen",
+                    regex: /\)/,
+                    next: "pop",
+                }]
+            },
+        ]
     };
+
+    this.embedRules(PythonHighlightRules, "python-", [
+        {
+            token: "paren.rparen",
+            regex: "^}$",
+            next: "start"
+        }
+    ]);
 
     this.embedRules(PythonHighlightRules, "python-def-", [
         {
