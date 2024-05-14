@@ -6,8 +6,9 @@ var oop = require("../lib/oop");
 var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
 
 var PythonHighlightRules = require("./python_highlight_rules").PythonHighlightRules;
+var ShHighlightRules = require("./sh_highlight_rules").ShHighlightRules;
 
-var ShHighlightRules = function() {
+var RobotHighlightRules = function() {
     const bitbakeIdentifierRegex = /[\w_][\w\.\-\+\{\}\$:]*/;
 
     this.$rules = {
@@ -42,10 +43,10 @@ var ShHighlightRules = function() {
                 next: "python-def-start",
             },
             {
-                token: "variable",
-                regex: "W",
-
-            }
+                // addhandler
+                token: "keyword",
+                regex: /addhandler(?=\s)/,
+            },
         ],
         "python_task": [
             {
@@ -85,10 +86,23 @@ var ShHighlightRules = function() {
                     next: "pop",
                 }]
             },
+            {
+                token: "paren.lparen",
+                regex: /\{/,
+                next: "sh-start",
+            }
         ]
     };
 
     this.embedRules(PythonHighlightRules, "python-", [
+        {
+            token: "paren.rparen",
+            regex: "^}$",
+            next: "start"
+        }
+    ]);
+
+    this.embedRules(ShHighlightRules, "sh-", [
         {
             token: "paren.rparen",
             regex: "^}$",
@@ -104,10 +118,13 @@ var ShHighlightRules = function() {
             next: "start"
         }
     ]);
+
+
+
     this.normalizeRules();
 };
 
-oop.inherits(ShHighlightRules, TextHighlightRules);
+oop.inherits(RobotHighlightRules, TextHighlightRules);
 
-exports.ShHighlightRules = ShHighlightRules;
+exports.RobotHighlightRules = RobotHighlightRules;
 
