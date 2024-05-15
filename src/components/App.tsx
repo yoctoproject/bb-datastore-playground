@@ -1,8 +1,10 @@
-import React from "react";
+import React, {useEffect, useRef} from "react";
 
 import {AppShell, Burger, createTheme, MantineColorsTuple, MantineProvider} from '@mantine/core';
 import {useDisclosure} from "@mantine/hooks";
 import {PlaygroundTerminal} from "./PlaygroundTerminal";
+import AceEditor from "react-ace";
+import BitBakeMode from "../BitBakeMode";
 
 const myColor: MantineColorsTuple = [
     '#e4f8ff',
@@ -25,6 +27,12 @@ const theme = createTheme({
 
 export const App: React.FC = () => {
     const [opened, {toggle}] = useDisclosure();
+
+    const editor = useRef(null);
+
+    useEffect(() => {
+        editor.current.editor.getSession().setMode(new BitBakeMode());
+    }, []);
 
     return (
         <MantineProvider theme={theme}>
@@ -51,6 +59,12 @@ export const App: React.FC = () => {
 
                 <AppShell.Main>
                     <PlaygroundTerminal/>
+                    <AceEditor
+                        ref={editor}
+                        mode="text"
+                        theme="github"
+                        editorProps={{ $blockScrolling: true }}
+                    />,
                 </AppShell.Main>
             </AppShell>
 
