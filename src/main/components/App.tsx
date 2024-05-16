@@ -26,7 +26,7 @@ const theme = createTheme({
     }
 });
 
-const createWorker = createWorkerFactory(() => import('../workers/pyodide'));
+const createWorker = createWorkerFactory(() => import('../../pyodide-worker/worker'));
 
 export const App: React.FC = () => {
     const [opened, {toggle}] = useDisclosure();

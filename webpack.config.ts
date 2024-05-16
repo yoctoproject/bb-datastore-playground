@@ -6,7 +6,6 @@ import path from "path";
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import {WebWorkerPlugin} from '@shopify/web-worker/webpack';
-import {ExternalsPlugin} from "webpack";
 
 const OUTPUT_PATH = './dist/';
 
@@ -38,9 +37,8 @@ module.exports = (env: any, argv: any) => {
         context: __dirname,
         devtool: "source-map",
         entry: {
-            'main': './src/index',
+            'main': './src/main/index',
         },
-        target: ["web"],
 
         optimization: {
             splitChunks: {
@@ -64,7 +62,7 @@ module.exports = (env: any, argv: any) => {
             new webpack.ProgressPlugin(),
             new HtmlWebpackPlugin({
                 filename: path.resolve(OUTPUT_PATH, "index.html"),
-                template: "src/index.html.ejs"
+                template: "src/main/index.html.ejs"
             }),
             new CopyWebpackPlugin({
                 patterns: [
@@ -72,10 +70,7 @@ module.exports = (env: any, argv: any) => {
                 ]
             }),
             new WebWorkerPlugin({
-                plugins: [
-                    new webpack.IgnorePlugin({
-                        resourceRegExp: /^pyodide$/ })
-                ]
+                plugins: []
             }),
         ],
 
