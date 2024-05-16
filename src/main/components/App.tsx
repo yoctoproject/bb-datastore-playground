@@ -28,6 +28,10 @@ const theme = createTheme({
 
 const createWorker = createWorkerFactory(() => import('../../pyodide-worker/worker'));
 
+const wat = (str: string) => {
+    console.error(str);
+}
+
 export const App: React.FC = () => {
     const [opened, {toggle}] = useDisclosure();
 
@@ -41,7 +45,8 @@ export const App: React.FC = () => {
 
     useEffect(() => {
         (async () => {
-            await worker.runPython("print(1 + 2)")
+            await worker.setProgressCallback(wat);
+            await worker.runPython("print(1 + 2)", new URL("../../../assets/bitbake-2.8.0.zip", import.meta.url).toString())
         })();
     }, [worker])
 
