@@ -10,7 +10,6 @@ export const useSWRProgress = (key: string, options?: AxiosRequestConfig<never>)
             ...options,
             onDownloadProgress: progressEvent => {
                 const percentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                console.log(percentage);
                 setProgress(percentage);
             },
             responseType: "arraybuffer"
