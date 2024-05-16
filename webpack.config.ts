@@ -5,6 +5,8 @@ import WebpackAssetsManifest from "webpack-assets-manifest";
 import path from "path";
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
+import {WebWorkerPlugin} from '@shopify/web-worker/webpack';
+import {ExternalsPlugin} from "webpack";
 
 const OUTPUT_PATH = './dist/';
 
@@ -55,7 +57,6 @@ module.exports = (env: any, argv: any) => {
                 dynamicImport: true,
                 asyncFunction: true,
             },
-            globalObject: 'globalThis',
         },
 
         plugins: [
@@ -67,7 +68,13 @@ module.exports = (env: any, argv: any) => {
             }),
             new CopyWebpackPlugin({
                 patterns: [
-                    { from: path.resolve(__dirname, 'assets/'), to: 'assets' }
+                    {from: path.resolve(__dirname, 'assets/'), to: 'assets'}
+                ]
+            }),
+            new WebWorkerPlugin({
+                plugins: [
+                    new webpack.IgnorePlugin({
+                        resourceRegExp: /^pyodide$/ })
                 ]
             }),
         ],
@@ -137,6 +144,9 @@ module.exports = (env: any, argv: any) => {
         resolve: {
             modules: ['node_modules'],
             extensions: ['.js', '.jsx', '.ts', '.tsx'],
+            alias: {
+                'node-fetch': 'isomorphic-fetch',
+            },
         },
 
         mode: "development",

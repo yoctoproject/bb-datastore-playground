@@ -1,10 +1,11 @@
-import React, {useEffect, useRef} from "react";
+import React, {useEffect, useMemo, useRef} from "react";
 
 import {AppShell, Burger, createTheme, MantineColorsTuple, MantineProvider} from '@mantine/core';
 import {useDisclosure} from "@mantine/hooks";
 import {PlaygroundTerminal} from "./PlaygroundTerminal";
 import AceEditor from "react-ace";
 import BitBakeMode from "../BitBakeMode";
+import {createWorkerFactory, useWorker} from "@shopify/react-web-worker";
 
 const myColor: MantineColorsTuple = [
     '#e4f8ff',
@@ -25,6 +26,8 @@ const theme = createTheme({
     }
 });
 
+const createWorker = createWorkerFactory(() => import('../workers/pyodide'));
+
 export const App: React.FC = () => {
     const [opened, {toggle}] = useDisclosure();
 
@@ -33,6 +36,14 @@ export const App: React.FC = () => {
     useEffect(() => {
         editor.current.editor.getSession().setMode(new BitBakeMode());
     }, []);
+
+    const worker = useWorker(createWorker);
+
+    useEffect(() => {
+        (async () => {
+            await worker.runPython("print(1 + 2)")
+        })();
+    }, [worker])
 
     return (
         <MantineProvider theme={theme}>
@@ -58,7 +69,7 @@ export const App: React.FC = () => {
                 <AppShell.Navbar p="md">Navbar</AppShell.Navbar>
 
                 <AppShell.Main>
-                    <PlaygroundTerminal/>
+                    {/*<PlaygroundTerminal/>*/}
                     <AceEditor
                         ref={editor}
                         mode="text"

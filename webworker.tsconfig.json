@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "noImplicitAny": true,
+    "module": "ESNext",
+    "target": "webworker",
+    "moduleResolution": "node",
+    "types": ["pyodide"]
+  },
+  "files": ["src/workers/pyodide.ts"]
+}
