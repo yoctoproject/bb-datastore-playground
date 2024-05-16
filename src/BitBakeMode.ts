@@ -188,7 +188,7 @@ export class BitBakeHighlightRules extends TextHighlightRules {
             {
                 token: "text",
                 // A Python def function ends on the first non-indented line
-                regex: /^(?=[^\s])/,
+                regex: /^(?=\S)/,
                 next: "start"
             }
         ]);
