@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useRef} from "react";
 
-import {AppShell, Burger, createTheme, MantineColorsTuple, MantineProvider} from '@mantine/core';
+import {AppShell, Burger, createTheme, Group, MantineColorsTuple, MantineProvider} from '@mantine/core';
 import {useDisclosure} from "@mantine/hooks";
 import {PlaygroundTerminal} from "./PlaygroundTerminal";
 import AceEditor from "react-ace";
@@ -62,13 +62,16 @@ export const App: React.FC = () => {
                 padding="md"
             >
                 <AppShell.Header>
+                    <Group h="100%" px="md">
                     <Burger
+
                         opened={opened}
                         onClick={toggle}
                         hiddenFrom="sm"
                         size="sm"
                     />
-                    <div>Logo</div>
+                        OK
+                    </Group>
                 </AppShell.Header>
 
                 <AppShell.Navbar p="md">Navbar</AppShell.Navbar>
