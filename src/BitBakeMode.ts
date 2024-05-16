@@ -193,7 +193,7 @@ export class BitBakeHighlightRules extends TextHighlightRules {
             }
         ]);
 
-        //this.normalizeRules();
+        this.normalizeRules();
     }
 }
 
