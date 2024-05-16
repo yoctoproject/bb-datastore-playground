@@ -8,7 +8,7 @@ import "ace-builds/src-noconflict/mode-sh";
 
 const TextHighlightRules = ace.require('ace/mode/text_highlight_rules').TextHighlightRules;
 const TextMode = ace.require("ace/mode/text").Mode
-
+const PythonFoldMode = ace.require("ace/mode/folding/pythonic").FoldMode;
 const ShHighlightRules = ace.require("ace/mode/sh_highlight_rules").ShHighlightRules;
 const PythonHighlightRules = ace.require("ace/mode/python_highlight_rules").PythonHighlightRules;
 
@@ -201,5 +201,6 @@ export default class BitBakeMode extends TextMode {
     constructor() {
         super();
         this.HighlightRules = BitBakeHighlightRules;
+        this.foldingRules = new PythonFoldMode("\\:");
     }
 }
