@@ -1,30 +1,104 @@
 import React, {useEffect, useMemo, useRef} from "react";
 
-import {AppShell, Burger, createTheme, Group, MantineColorsTuple, MantineProvider} from '@mantine/core';
-import {useDisclosure} from "@mantine/hooks";
 import {PlaygroundTerminal} from "./PlaygroundTerminal";
 import AceEditor from "react-ace";
 import BitBakeMode from "../BitBakeMode";
 import {createWorkerFactory, useWorker} from "@shopify/react-web-worker";
+import {Layout, Model} from 'flexlayout-react';
+import 'flexlayout-react/style/light.css';
+import {Button, ButtonGroup, Container, Dropdown, DropdownButton, Navbar} from "react-bootstrap";
+import ButtonToolbar from 'react-bootstrap/ButtonToolbar'
+import {IJsonModel} from "flexlayout-react/src/model/IJsonModel";
 
-const myColor: MantineColorsTuple = [
-    '#e4f8ff',
-    '#d3eafc',
-    '#a9d1f1',
-    '#7db7e6',
-    '#58a1dd',
-    '#3f94d8',
-    '#2f8dd6',
-    '#1e7abe',
-    '#0c6cac',
-    '#005e99'
-];
 
-const theme = createTheme({
-    colors: {
-        myColor,
+const json: IJsonModel = {
+    global: {},
+    borders: [],
+    layout: {
+        type: "row",
+        weight: 100,
+        children: [
+            {
+                type: "tabset",
+                weight: 50,
+                children: [
+                    {
+                        type: "tab",
+                        name: "Editor",
+                        component: "test",
+                    }
+                ]
+            },
+            {
+                type: "tabset",
+                weight: 50,
+                children: [
+                    {
+                        type: "tab",
+                        name: "Terminal",
+                        component: "button",
+                    }
+                ]
+            },
+        ]
     }
-});
+};
+
+const model = Model.fromJson(json);
+
+const EditorWrapper = () => {
+
+    const editor = useRef(null);
+
+    useEffect(() => {
+        editor.current.editor.getSession().setMode(new BitBakeMode());
+    }, []);
+
+    return (
+        <div>
+            {/*<ButtonToolbar>*/}
+            {/*    <ButtonGroup>*/}
+            {/*        <Button>1</Button>*/}
+            {/*        <Button>2</Button>*/}
+
+            {/*        <DropdownButton as={ButtonGroup} title="Dropdown" id="bg-nested-dropdown">*/}
+            {/*            <Dropdown.Item eventKey="1">Dropdown link</Dropdown.Item>*/}
+            {/*            <Dropdown.Item eventKey="2">Dropdown link</Dropdown.Item>*/}
+            {/*        </DropdownButton>*/}
+            {/*    </ButtonGroup>*/}
+            {/*</ButtonToolbar>*/}
+            <AceEditor
+                ref={editor}
+                mode="text"
+                theme="github"
+                editorProps={{$blockScrolling: true}}
+            />
+        </div>
+    );
+}
+
+function Wat2() {
+
+    const factory = (node) => {
+        const component = node.getComponent();
+
+        if (component === "button") {
+            return <PlaygroundTerminal/>;
+        } else if (component === "test") {
+            return <EditorWrapper/>
+        }
+    }
+
+    return (
+        <div style={{position: "relative", height: "calc(100vh - 56px)"}}>
+            <Layout
+                model={model}
+                factory={factory}
+            />
+        </div>
+    );
+}
+
 
 const createWorker = createWorkerFactory(() => import('../../pyodide-worker/worker'));
 
@@ -33,14 +107,6 @@ const wat = (str: string) => {
 }
 
 export const App: React.FC = () => {
-    const [opened, {toggle}] = useDisclosure();
-
-    const editor = useRef(null);
-
-    useEffect(() => {
-        editor.current.editor.getSession().setMode(new BitBakeMode());
-    }, []);
-
     const worker = useWorker(createWorker);
 
     useEffect(() => {
@@ -51,42 +117,21 @@ export const App: React.FC = () => {
     }, [worker])
 
     return (
-        <MantineProvider theme={theme}>
-            <AppShell
-                header={{height: 60}}
-                navbar={{
-                    width: 300,
-                    breakpoint: 'sm',
-                    collapsed: {mobile: !opened},
-                }}
-                padding="md"
-            >
-                <AppShell.Header>
-                    <Group h="100%" px="md">
-                    <Burger
-
-                        opened={opened}
-                        onClick={toggle}
-                        hiddenFrom="sm"
-                        size="sm"
-                    />
-                        OK
-                    </Group>
-                </AppShell.Header>
-
-                <AppShell.Navbar p="md">Navbar</AppShell.Navbar>
-
-                <AppShell.Main>
-                    {/*<PlaygroundTerminal/>*/}
-                    <AceEditor
-                        ref={editor}
-                        mode="text"
-                        theme="github"
-                        editorProps={{ $blockScrolling: true }}
-                    />,
-                </AppShell.Main>
-            </AppShell>
-
-        </MantineProvider>
+        <div>
+            <Navbar className="bg-body-tertiary">
+                <Container fluid>
+                    <Navbar.Brand href="#home" className="align-items-center d-flex">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor"
+                             className="bi bi-play-fill" viewBox="0 0 16 16">
+                            <path
+                                d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393"/>
+                        </svg>
+                        {' '}
+                        BB Datastore Playground
+                    </Navbar.Brand>
+                </Container>
+            </Navbar>
+            <Wat2/>
+        </div>
     );
 };

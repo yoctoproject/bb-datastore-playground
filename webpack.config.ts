@@ -1,5 +1,4 @@
 import BundleTracker from "webpack-bundle-tracker";
-import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import webpack from "webpack";
 import WebpackAssetsManifest from "webpack-assets-manifest";
 import path from "path";
@@ -14,10 +13,6 @@ module.exports = (env: any, argv: any) => {
         ? "https://yoctoproject.github.io/bb-datastore-playground/" : "";
 
     const plugins = [
-        new MiniCssExtractPlugin({
-            filename: '[name]-[contenthash].css',
-            chunkFilename: '[name]-[contenthash].css',
-        }),
         new WebpackAssetsManifest({
             entrypoints: true,
         }),
@@ -88,7 +83,7 @@ module.exports = (env: any, argv: any) => {
                 },
                 {
                     test: /\.css$/,
-                    use: [MiniCssExtractPlugin.loader, 'css-loader', {
+                    use: ["style-loader", 'css-loader', {
                         loader: 'postcss-loader',
                         options: {
                             postcssOptions: {
@@ -107,7 +102,7 @@ module.exports = (env: any, argv: any) => {
                 {
                     test: /\.s[ac]ss$/i,
                     use: [
-                        MiniCssExtractPlugin.loader,
+                        "style-loader",
                         'css-loader',
                         {
                             loader: 'postcss-loader',
@@ -127,11 +122,6 @@ module.exports = (env: any, argv: any) => {
                         // Compiles Sass to CSS
                         "sass-loader",
                     ],
-                },
-                {
-                    test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
-                    include: path.resolve(__dirname, './node_modules/bootstrap-icons/font/fonts'),
-                    type: "asset/inline",
                 },
             ],
         },
