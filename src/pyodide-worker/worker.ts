@@ -1,7 +1,8 @@
-import type {PyodideInterface, loadPyodide} from "pyodide";
+import type {loadPyodide, PyodideInterface} from "pyodide";
 import {retain} from "@shopify/react-web-worker";
 import axios from "axios";
-import {EnvironmentStatus} from "../main/hooks/useEnvironmentSetup";
+
+console.error("WORKER!")
 
 declare let self: DedicatedWorkerGlobalScope & {
     pyodide: PyodideInterface,
@@ -17,13 +18,20 @@ async function loadPyodideAndPackages() {
     await self.pyodide.loadPackage(["sqlite3"]);
 }
 
-const pyodideReadyPromise = loadPyodideAndPackages();
-
-let the_func = null;
+let the_func = [
+    async (str) => {
+        console.log(str);
+    }
+];
 
 export const setProgressCallback = async (func) => {
-    the_func = func;
+    the_func.push(func);
     retain(func);
+    console.log(the_func);
+}
+
+const printAll = async (str) => {
+    await Promise.all(the_func.map(f => f(str)));
 }
 
 let bitbake_data = false;
@@ -34,28 +42,28 @@ const download_bitbake = async (u) => {
 
 export const runPython = async (python: string, u: string) => {
     const bitbakePromise = axios({
-            method: 'get',
-            url: u,
-            responseType: 'arraybuffer',
-            onDownloadProgress: function (progressEvent) {
-                // Calculate the download progress percentage
-                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                // Send the progress percentage back to the main thread
-                the_func(`progress: ${percentCompleted}`);
-            }
-        })
-            .then(response => {
-                return response.data;
-                // Send the downloaded data back to the main thread
-                //self.postMessage({ type: 'success', data: response.data });
-            });
+        method: 'get',
+        url: u,
+        responseType: 'arraybuffer',
+        onDownloadProgress: async function (progressEvent) {
+            // Calculate the download progress percentage
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            // Send the progress percentage back to the main thread
+            await printAll(`progress: ${percentCompleted}`);
+        }
+    })
+        .then(response => {
+            return response.data;
+            // Send the downloaded data back to the main thread
+            //self.postMessage({ type: 'success', data: response.data });
+        });
 
     const pyodidePromise = async () => {
-        await the_func("starting!");
+        await printAll("starting!");
 
         // make sure loading is done
-        await pyodideReadyPromise;
-        await the_func("done starting!");
+        await loadPyodideAndPackages();
+        await printAll("done starting!");
 
         await self.pyodide.loadPackagesFromImports(python);
     };
@@ -192,10 +200,3 @@ print(sys.meta_path)
     const results = await self.pyodide.runPythonAsync(python);
     return `${results}`;
 }
-
-
-export const streamMe = function* () {
-    yield 'a';
-    yield 'b';
-    yield 'c';
-};

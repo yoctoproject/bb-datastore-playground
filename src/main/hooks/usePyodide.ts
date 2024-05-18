@@ -22,7 +22,7 @@ export const usePyodide: () => { pyodide: PyodideInterface; status: PyodideStatu
         const loadPyodide = async () => {
             if (!cachedInstance) {
                 setStatus(PyodideStatus.Fetching);
-                const { loadPyodide: loadPyodideModule } = await import("https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.mjs");
+                const {loadPyodide: loadPyodideModule} = await import("https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.mjs");
                 setStatus(PyodideStatus.Loading);
                 cachedInstance = await loadPyodideModule();
                 setStatus(PyodideStatus.Done);
@@ -40,5 +40,5 @@ export const usePyodide: () => { pyodide: PyodideInterface; status: PyodideStatu
         };
     }, []);
 
-    return { pyodide, status } as const;
+    return {pyodide, status} as const;
 };

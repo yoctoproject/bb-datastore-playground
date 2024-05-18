@@ -18,7 +18,7 @@ export class BitBakeHighlightRules extends TextHighlightRules {
         const bitbakeIdentifierRegex = /[\w_][\w.\-+{}$:]*/;
 
         this.$rules = {
-            "start" : [
+            "start": [
                 {
                     // Comment - don't bother handling line continuation in comments
                     token: "comment",

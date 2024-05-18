@@ -6,15 +6,15 @@ import {PyodideInterface} from "pyodide";
 
 // Taken from https://terminal.jcubic.pl/examples.php
 function progress(percent, width) {
-    var size = Math.round(width*percent/100);
+    var size = Math.round(width * percent / 100);
     var left = '', taken = '', i;
-    for (i=size; i--;) {
+    for (i = size; i--;) {
         taken += '=';
     }
     if (taken.length > 0) {
         taken = taken.replace(/=$/, '>');
     }
-    for (i=width-size; i--;) {
+    for (i = width - size; i--;) {
         left += ' ';
     }
     return '[' + taken + left + '] ' + percent + '%';
@@ -121,7 +121,7 @@ function create_interpreter(pyodide: PyodideInterface, term: JQueryTerminal) {
         unlock();
     }
 
-    pyconsole.stdout_callback = (s) => echo(s, { newline: false });
+    pyconsole.stdout_callback = (s) => echo(s, {newline: false});
     pyconsole.stderr_callback = (s) => {
         term.error(s.trimEnd());
     };

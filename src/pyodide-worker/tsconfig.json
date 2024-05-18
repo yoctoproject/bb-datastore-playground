@@ -4,7 +4,10 @@
     "noImplicitAny": true,
     "module": "ESNext",
     "target": "ESNext",
-    "lib": ["ESNext", "webworker"]
+    "lib": [
+      "ESNext",
+      "webworker"
+    ]
   },
   "ts-node": {
     // these options are overrides used only by ts-node

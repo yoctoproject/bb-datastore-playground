@@ -42,7 +42,7 @@ export const useEnvironmentSetup = () => {
     const [state, dispatch] = useImmerReducer(reducer, initialEnvironmentState);
 
     const [{data}, {progress, done}] = useSWRProgress("assets/bitbake-2.8.0.zip");
-    const {pyodide, status: pyodideStatus } = usePyodide();
+    const {pyodide, status: pyodideStatus} = usePyodide();
 
     useEffect(() => {
         dispatch({type: "pyodideStatusChanged", pyodideStatus: pyodideStatus});
@@ -57,7 +57,7 @@ export const useEnvironmentSetup = () => {
     useEffect(() => {
         if (pyodideStatus === PyodideStatus.Done && progress === 100 && effectStatus.current === InternalStatus.NotRun) {
             effectStatus.current = InternalStatus.Running;
-            const f = async() => {
+            const f = async () => {
                 dispatch({type: "environmentStatusChanged", environmentStatus: EnvironmentStatus.LoadingSqlite3});
                 await pyodide.loadPackage("sqlite3");
                 dispatch({type: "environmentStatusChanged", pyodideStatus: EnvironmentStatus.UnpackingBitbake});
