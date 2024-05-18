@@ -1,20 +1,16 @@
-import React, {useImperativeHandle, forwardRef, useRef, useEffect} from "react";
-import * as $ from "jquery";
+import React, {forwardRef, useEffect, useImperativeHandle, useRef} from "react";
+import $ from "jquery";
 import 'jquery.terminal';
 import 'jquery.terminal/css/jquery.terminal.min.css';
-import {terminal} from "jquery";
-import {usePyodide} from "../hooks/usePyodide";
 
 interface Props {
     interpreter?: TypeOrArray<JQueryTerminal.Interpreter>,
     options?: JQueryTerminal.TerminalOptions
 }
 
-const BANNER = `
-Copyright (C) Agilent Technologies 2024
-`;
+const BANNER = `Copyright (C) Agilent Technologies 2024`;
 
-export const JQueryTerminal: React.ForwardRefExoticComponent<React.PropsWithoutRef<Props> & React.RefAttributes<unknown>> = forwardRef(function JQueryTerminal(props, ref) {
+export const JQueryTerminal: React.ForwardRefExoticComponent<React.PropsWithoutRef<Props> & React.RefAttributes<unknown>> = forwardRef(function JQueryTerminal(props: Props, ref) {
     const terminalContainerRef = useRef(null);
     const terminalObjectRef = useRef<JQueryTerminal>(null);
 
@@ -46,24 +42,20 @@ export const JQueryTerminal: React.ForwardRefExoticComponent<React.PropsWithoutR
     }, []);
 
     useEffect(() => {
-        const currentTerminal = terminalContainerRef.current;
+        const obj: JQueryTerminal | null = terminalObjectRef.current;
 
-        if (currentTerminal) {
-            terminalObjectRef.current = $(currentTerminal).terminal(props.interpreter, {
-                greetings: BANNER,
-                ...props.options
-            });
-        }
+        terminalObjectRef.current = $(terminalContainerRef.current).terminal(props.interpreter, {
+            greetings: BANNER,
+            ...props.options
+        });
 
         return () => {
-            if (currentTerminal) {
-                $(currentTerminal).remove();
-            }
-            if (terminalObjectRef.current) {
+            if (obj) {
+                obj.destroy();
                 terminalObjectRef.current = null;
             }
         };
     }, [props.interpreter, props.options]);
 
-    return <div ref={terminalContainerRef} id="terminal" style={{height: '600px'}}></div>;
+    return (<div ref={terminalContainerRef} style={{height: '600px'}}></div>);
 });
