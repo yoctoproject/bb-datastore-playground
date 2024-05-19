@@ -8,8 +8,6 @@ const wat = (str: string) => {
 }
 
 export const StatusPanel: React.FC = () => {
-    const [p, setP] = useImmer([]);
-
     const worker = useSelector((state: RootState) => state.worker.worker);
 
     useEffect(() => {
@@ -17,25 +15,17 @@ export const StatusPanel: React.FC = () => {
         (async () => {
             if (worker) {
                 console.error("INSTALLLLLLING");
-                await worker.setProgressCallback((str) => {
-                    console.log(`>>>>> ${str}`)
-                    setP((t) => {
-                        t.push(str);
-                    })
-                });
-                console.error("installed");
+                // await worker.setProgressCallback((str) => {
+                //     console.log(`>>>>> ${str}`)
+                // });
+                // console.error("installed");
                 await worker.runPython("print(1 + 2)", new URL("../../../../assets/bitbake-2.8.0.zip", import.meta.url).toString());
                 console.error("ran python");
-            } else {
-                console.warn("NOT WORKER")
             }
         })();
-    }, [setP, worker]);
+    }, [worker]);
 
     return <div>
         Status!
-        <ul>
-            {p.map(i => <li>{i}</li>)}
-        </ul>
     </div>;
 };

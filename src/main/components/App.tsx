@@ -1,56 +1,40 @@
-import React, {useEffect} from "react";
-import {createWorkerFactory, useWorker} from "@shopify/react-web-worker";
+import React, {useEffect, useMemo, useState} from "react";
 import 'flexlayout-react/style/light.css';
 import {Button, ButtonGroup, Dropdown, DropdownButton} from "react-bootstrap";
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar'
 import {MainNavbar} from "./MainNavbar";
 import {AppLayout} from "./layout";
-import {useMountedRef} from "@shopify/react-hooks";
-import {useDispatch} from "react-redux";
-import {setWorker} from "../api/webWorkerApiSlice";
+import {MyWorker} from "../../pyodide-worker/worker";
+
+import * as comlink from "comlink";
+import {Remote} from "comlink";
 
 
-const createWorker = createWorkerFactory(() => import('../../pyodide-worker/worker'));
-
-const wat = (str: string) => {
-    console.error("P " + str);
-}
+const w = new Worker(new URL("../../pyodide-worker/worker.ts", import.meta.url));
 
 export const App: React.FC = () => {
-    const mounted = useMountedRef();
-    const worker = useWorker(createWorker);
+    const [worker, setWorker] = useState<Remote<MyWorker>>(null)
+
+    useEffect(() => {
+        let active = true;
+        load();
+        return () => { active = false };
+
+        async function load() {
+            const wrapped = comlink.wrap<typeof MyWorker>(w);
+            const res = await new wrapped();
+            if (!active) { return; }
+            setWorker(() => res);
+        }
+    }, [])
 
     useEffect(() => {
         (async () => {
-            console.log(worker);
-            if (mounted.current) {
-                console.log("calling setProgressCallback");
-               // await worker.setProgressCallback(wat);
-            } else {
-                console.log("avoided the call!");
-            }
-
-            if (mounted.current) {
-                //await worker.runPython("print(1 + 2)", new URL("../../../assets/bitbake-2.8.0.zip", import.meta.url).toString())
-            } else {
-                console.log("avoided the call!")
+            if (worker) {
+                await worker.test();
             }
         })();
-
-        return () => {
-            console.log("cleanup")
-        }
-    }, [mounted, worker])
-
-    const dispatch = useDispatch();
-
-    useEffect(() => {
-        dispatch(setWorker(worker)); // Dispatch an action to set the worker instance in Redux
-
-        return () => {
-            dispatch(setWorker(null));
-        }
-    }, [dispatch, worker]);
+    }, [worker])
 
     return (
         <div>

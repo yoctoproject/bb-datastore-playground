@@ -1,5 +1,6 @@
 import type {loadPyodide, PyodideInterface} from "pyodide";
-import {retain} from "@shopify/react-web-worker";
+import {expose} from 'comlink'
+
 import axios from "axios";
 
 console.error("WORKER!")
@@ -24,12 +25,6 @@ let the_func = [
     }
 ];
 
-export const setProgressCallback = async (func) => {
-    the_func.push(func);
-    retain(func);
-    console.log(the_func);
-}
-
 const printAll = async (str) => {
     await Promise.all(the_func.map(f => f(str)));
 }
@@ -40,45 +35,55 @@ const download_bitbake = async (u) => {
     await fetch(u);
 };
 
-export const runPython = async (python: string, u: string) => {
-    const bitbakePromise = axios({
-        method: 'get',
-        url: u,
-        responseType: 'arraybuffer',
-        onDownloadProgress: async function (progressEvent) {
-            // Calculate the download progress percentage
-            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            // Send the progress percentage back to the main thread
-            await printAll(`progress: ${percentCompleted}`);
-        }
-    })
-        .then(response => {
-            return response.data;
-            // Send the downloaded data back to the main thread
-            //self.postMessage({ type: 'success', data: response.data });
+export class MyWorker {
+    async setProgressCallback(func) {
+        the_func.push(func);
+        console.log(the_func);
+    }
+
+    async test() {
+        console.log("OK");
+    }
+
+    async runPython(python: string, u: string) {
+        const bitbakePromise = axios({
+            method: 'get',
+            url: u,
+            responseType: 'arraybuffer',
+            onDownloadProgress: async function (progressEvent) {
+                // Calculate the download progress percentage
+                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                // Send the progress percentage back to the main thread
+                await printAll(`progress: ${percentCompleted}`);
+            }
+        })
+            .then(response => {
+                return response.data;
+                // Send the downloaded data back to the main thread
+                //self.postMessage({ type: 'success', data: response.data });
+            });
+
+        const pyodidePromise = async () => {
+            await printAll("starting!");
+
+            // make sure loading is done
+            await loadPyodideAndPackages();
+            await printAll("done starting!");
+
+            await self.pyodide.loadPackagesFromImports(python);
+        };
+
+        const [bitbakeData, r] = await Promise.all([bitbakePromise, pyodidePromise()]);
+
+        console.log("unpacling...")
+        self.pyodide.unpackArchive(bitbakeData, "zip", {
+            extractDir: "bb"
         });
 
-    const pyodidePromise = async () => {
-        await printAll("starting!");
-
-        // make sure loading is done
-        await loadPyodideAndPackages();
-        await printAll("done starting!");
-
-        await self.pyodide.loadPackagesFromImports(python);
-    };
-
-    const [bitbakeData, r] = await Promise.all([bitbakePromise, pyodidePromise()]);
-
-    console.log("unpacling...")
-    self.pyodide.unpackArchive(bitbakeData, "zip", {
-        extractDir: "bb"
-    });
-
-    console.log("done");
+        console.log("done");
 
 
-    self.pyodide.runPython(`
+        self.pyodide.runPython(`
 import os.path
 import sys
 from importlib.abc import Loader, MetaPathFinder
@@ -188,15 +193,18 @@ sys.meta_path.append(BuiltinImporterShim())
 
 print(sys.meta_path)
         `)
-    // const file = pyodide.FS.readdir("./bb");
-    // console.log(file);
+        // const file = pyodide.FS.readdir("./bb");
+        // console.log(file);
 
-    self.pyodide.runPython(`
+        self.pyodide.runPython(`
                     import sys
                     sys.path.insert(0, "./bb/bitbake-2.8.0/lib/")
                     from bb.data_smart import DataSmart    
                 `)
 
-    const results = await self.pyodide.runPythonAsync(python);
-    return `${results}`;
+        const results = await self.pyodide.runPythonAsync(python);
+        return `${results}`;
+    }
 }
+
+expose(MyWorker);

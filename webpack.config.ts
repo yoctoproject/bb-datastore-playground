@@ -4,7 +4,6 @@ import WebpackAssetsManifest from "webpack-assets-manifest";
 import path from "path";
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
-import {WebWorkerPlugin} from '@shopify/web-worker/webpack';
 
 const OUTPUT_PATH = './dist/';
 
@@ -63,9 +62,6 @@ module.exports = (env: any, argv: any) => {
                 patterns: [
                     {from: path.resolve(__dirname, 'assets/'), to: 'assets'}
                 ]
-            }),
-            new WebWorkerPlugin({
-                plugins: []
             }),
         ],
 
