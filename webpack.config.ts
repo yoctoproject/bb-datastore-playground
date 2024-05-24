@@ -139,6 +139,8 @@ module.exports = (env: any, argv: any) => {
         externals: {
             pyodide: 'pyodide'
         },
-
+        devServer: {
+            historyApiFallback: true,
+        }
     }
 }

@@ -20,5 +20,5 @@ const workerSlice = createSlice({
     },
 });
 
-export const {setWorker} = workerSlice.actions;
+export const {setWorker: setWorkerReducer} = workerSlice.actions;
 export default workerSlice.reducer;

@@ -8,6 +8,8 @@ import {MyWorker} from "../../pyodide-worker/worker";
 
 import * as comlink from "comlink";
 import {Remote} from "comlink";
+import {setWorkerReducer} from "../api/webWorkerApiSlice";
+import {useDispatch} from "react-redux";
 
 
 const w = new Worker(new URL("../../pyodide-worker/worker.ts", import.meta.url));
@@ -28,17 +30,19 @@ export const App: React.FC = () => {
         }
     }, [])
 
+    const dispatch = useDispatch();
+
     useEffect(() => {
         (async () => {
             if (worker) {
                 await worker.test();
+                //dispatch(setWorkerReducer(worker));
             }
         })();
-    }, [worker])
+    }, [dispatch, worker])
 
     return (
         <div>
-            <MainNavbar/>
             <ButtonToolbar>
                 <ButtonGroup>
                     <Button>1</Button>

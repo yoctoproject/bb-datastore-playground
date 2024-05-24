@@ -43,6 +43,7 @@ export class MyWorker {
 
     async test() {
         console.log("OK");
+        await printAll("callback!");
     }
 
     async runPython(python: string, u: string) {

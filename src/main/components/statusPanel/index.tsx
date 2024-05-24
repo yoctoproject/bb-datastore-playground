@@ -3,6 +3,8 @@ import {useSelector} from "react-redux";
 import {RootState} from "../../api/store";
 import {useImmer} from "use-immer";
 
+import * as comlink from "comlink";
+
 const wat = (str: string) => {
     console.error(str);
 }
@@ -15,10 +17,8 @@ export const StatusPanel: React.FC = () => {
         (async () => {
             if (worker) {
                 console.error("INSTALLLLLLING");
-                // await worker.setProgressCallback((str) => {
-                //     console.log(`>>>>> ${str}`)
-                // });
-                // console.error("installed");
+                await worker.setProgressCallback(comlink.proxy(wat));
+                console.error("installed");
                 await worker.runPython("print(1 + 2)", new URL("../../../../assets/bitbake-2.8.0.zip", import.meta.url).toString());
                 console.error("ran python");
             }
