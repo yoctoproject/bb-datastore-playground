@@ -60,7 +60,8 @@ module.exports = (env: any, argv: any) => {
             }),
             new CopyWebpackPlugin({
                 patterns: [
-                    {from: path.resolve(__dirname, 'assets/'), to: 'assets'}
+                    {from: path.resolve(__dirname, 'assets/'), to: 'assets'},
+                    {from: path.resolve(__dirname, "404.html"), to: ""},
                 ]
             }),
         ],
