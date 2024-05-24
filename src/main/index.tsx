@@ -25,7 +25,9 @@ const router = createBrowserRouter([
             },
         ],
     },
-]);
+], {
+    basename: "/bb-datastore-playground",
+});
 
 
 
