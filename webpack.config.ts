@@ -4,12 +4,13 @@ import WebpackAssetsManifest from "webpack-assets-manifest";
 import path from "path";
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
+import fs from "fs";
 
 const OUTPUT_PATH = './dist/';
 
 module.exports = (env: any, argv: any) => {
     const PUBLIC_PATH = argv.mode === 'production'
-        ? "https://yoctoproject.github.io/bb-datastore-playground/" : "";
+        ? "https://yoctoproject.github.io/bb-datastore-playground/" : "/";
 
     const plugins = [
         new WebpackAssetsManifest({
@@ -64,6 +65,15 @@ module.exports = (env: any, argv: any) => {
                     {from: path.resolve(__dirname, "404.html"), to: ""},
                 ]
             }),
+            new webpack.DefinePlugin({
+                'APP_OAUTH_REDIRECT_URI': JSON.stringify(
+                    process.env.APP_OAUTH_REDIRECT_URI || "http://127.0.0.1:8080/bb-datastore-playground/oauth"
+                ),
+                'APP_OAUTH_CLIENT_ID': JSON.stringify(
+                    // Fallback to developer app client ID
+                    process.env.APP_OAUTH_CLIENT_ID || "Ov23libhHOo9ygylrdnD",
+                )
+            })
         ],
 
         module: {
@@ -141,7 +151,18 @@ module.exports = (env: any, argv: any) => {
             pyodide: 'pyodide'
         },
         devServer: {
-            historyApiFallback: true,
+            historyApiFallback: {
+                rewrites: [{ from: /\/bb-datastore-playground\/[^?]/, to: '/404.html' }],
+            },
+            open: "bb-datastore-playground",
+            server: {
+                type: "https",
+                options: {
+                    key: fs.readFileSync("cert.key"),
+                    cert: fs.readFileSync("cert.crt"),
+                    ca: fs.readFileSync("ca.crt"),
+                },
+            }
         }
     }
 }

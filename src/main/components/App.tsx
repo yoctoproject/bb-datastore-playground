@@ -1,45 +1,27 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect} from "react";
 import 'flexlayout-react/style/light.css';
 import {Button, ButtonGroup, Dropdown, DropdownButton} from "react-bootstrap";
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar'
-import {MainNavbar} from "./MainNavbar";
 import {AppLayout} from "./layout";
-import {MyWorker} from "../../pyodide-worker/worker";
-
-import * as comlink from "comlink";
-import {Remote} from "comlink";
-import {setWorkerReducer} from "../api/webWorkerApiSlice";
 import {useDispatch} from "react-redux";
+import {useManagedWorker} from "../hooks/usePyodideWorker";
+import {fetchDataFromWorker} from "../api/thunks/pyodide";
 
-
-const w = new Worker(new URL("../../pyodide-worker/worker.ts", import.meta.url));
 
 export const App: React.FC = () => {
-    const [worker, setWorker] = useState<Remote<MyWorker>>(null)
-
-    useEffect(() => {
-        let active = true;
-        load();
-        return () => { active = false };
-
-        async function load() {
-            const wrapped = comlink.wrap<typeof MyWorker>(w);
-            const res = await new wrapped();
-            if (!active) { return; }
-            setWorker(() => res);
-        }
-    }, [])
-
+    const workerUuid = useManagedWorker();
     const dispatch = useDispatch();
+    console.log("UUID: " + workerUuid);
 
     useEffect(() => {
         (async () => {
-            if (worker) {
-                await worker.test();
+            if (workerUuid) {
+                console.log("invoking: " + workerUuid)
+                dispatch(fetchDataFromWorker(workerUuid));
                 //dispatch(setWorkerReducer(worker));
             }
         })();
-    }, [dispatch, worker])
+    }, [dispatch, workerUuid])
 
     return (
         <div>

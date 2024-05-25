@@ -1,7 +1,6 @@
 import React, {useEffect} from "react";
 import {useSelector} from "react-redux";
 import {RootState} from "../../api/store";
-import {useImmer} from "use-immer";
 
 import * as comlink from "comlink";
 
