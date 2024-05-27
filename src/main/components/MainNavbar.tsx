@@ -1,12 +1,24 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {Container, Navbar} from "react-bootstrap";
 import {useLoginMutation} from "../api/services/auth";
 import {useDispatch} from "react-redux";
 import {Link} from "react-router-dom";
+import {useServiceWorkerStore} from "../store";
 
 export const MainNavbar: React.FC = () => {
-    const [login, {isLoading}] = useLoginMutation();
     const dispatch = useDispatch();
+
+    const [loggedIn, setLoggedIn] = useState(false);
+
+    const serviceWorkerProxy = useServiceWorkerStore((state) => state.serviceWorker);
+
+    useEffect(() => {
+        (async () => {
+            if (serviceWorkerProxy) {
+                setLoggedIn(await serviceWorkerProxy.isLoggedIn());
+            }
+        })();
+    }, [serviceWorkerProxy]);
 
     const handleLogin = () => {
         const clientId = APP_OAUTH_CLIENT_ID;
@@ -22,7 +34,7 @@ export const MainNavbar: React.FC = () => {
             <Container fluid>
                 <Navbar.Brand href="#home" className="align-items-center d-flex">
                     <svg width="64" height="64" xmlns="http://www.w3.org/2000/svg" className="pe-3">
-                        <image href="assets/images/BBDatastorePlaygroundLogo.svg" height="64" width="64"/>
+                        <image href="/assets/images/BBDatastorePlaygroundLogo.svg" height="64" width="64"/>
                     </svg>
                     {' '}
                     BB Datastore Playground
@@ -35,6 +47,7 @@ export const MainNavbar: React.FC = () => {
                     >
                         about
                     </Link>
+                    {!loggedIn && (
                     <button
                         type="button"
                         className="btn btn-dark me-2"
@@ -48,7 +61,7 @@ export const MainNavbar: React.FC = () => {
                             </svg>
                             Login
                         </div>
-                    </button>
+                    </button>)}
                 </div>
             </Container>
         </Navbar>

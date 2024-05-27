@@ -67,7 +67,7 @@ module.exports = (env: any, argv: any) => {
             }),
             new webpack.DefinePlugin({
                 'APP_OAUTH_REDIRECT_URI': JSON.stringify(
-                    process.env.APP_OAUTH_REDIRECT_URI || "http://127.0.0.1:8080/bb-datastore-playground/oauth"
+                    process.env.APP_OAUTH_REDIRECT_URI || "https://127.0.0.1:8080/bb-datastore-playground/oauth"
                 ),
                 'APP_OAUTH_CLIENT_ID': JSON.stringify(
                     // Fallback to developer app client ID
