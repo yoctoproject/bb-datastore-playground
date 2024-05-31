@@ -1,9 +1,8 @@
 import React from "react";
-import {Button, Container, Dropdown, DropdownButton, Nav, Navbar, NavDropdown, NavItem} from "react-bootstrap";
+import {Button, Container, Dropdown, Nav, Navbar, NavDropdown, NavItem} from "react-bootstrap";
 import {Link} from "react-router-dom";
 import {useGetUserQuery} from "../api/services/github";
 import {useSelector} from "react-redux";
-import BootstrapDropdownButton from "./BootstrapDropdownButton";
 
 export const MainNavbar: React.FC = () => {
     const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
@@ -16,7 +15,7 @@ export const MainNavbar: React.FC = () => {
     console.log(data);
 
     return (
-        <Navbar className="bg-body-tertiary">
+        <Navbar variant="dark">
             <Container fluid>
                 <Navbar.Brand href="#home" className="align-items-center d-flex">
                     <svg width="64" height="64" xmlns="http://www.w3.org/2000/svg" className="pe-3">
@@ -25,9 +24,9 @@ export const MainNavbar: React.FC = () => {
                     {' '}
                     BB Datastore Playground
                 </Navbar.Brand>
-                <div className="text-end d-flex">
+                <div className="text-end d-flex align-items-center me-2 gap-4">
                     <Link
-                        className="btn btn-outline-dark nav-item"
+                        className="btn btn-outline-light nav-item"
                         role="button"
                         to="/about"
                     >
@@ -48,11 +47,11 @@ export const MainNavbar: React.FC = () => {
                         </Button>
                     )}
                     {isLoggedIn && (
-                        <BootstrapDropdownButton title={<img src={data?.avatar_url || ""} alt="mdo" width="32" height="32"
-                                                    className="rounded-circle"/>} align="end">
+                        <NavDropdown title={<img src={data?.avatar_url || ""}  alt="mdo" width="48" height="48"
+                                                         className="rounded-circle"/>} align="end">
                             <NavDropdown.Item href="#">Test</NavDropdown.Item>
                             <NavDropdown.Item onClick={handleLogout}>Sign out</NavDropdown.Item>
-                        </BootstrapDropdownButton>
+                        </NavDropdown>
                     )}
                 </div>
             </Container>
