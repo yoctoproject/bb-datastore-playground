@@ -70,6 +70,7 @@
     "webpack-virtual-modules": "^0.6.1"
   },
   "dependencies": {
+    "@octokit/types": "^13.5.0",
     "@reduxjs/toolkit": "^2.2.5",
     "@shopify/react-hooks": "^3.1.1",
     "@types/react": "^18.2.77",

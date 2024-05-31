@@ -1,16 +1,16 @@
 // store.ts
 
 import {configureStore} from '@reduxjs/toolkit';
-import workerReducer from './webWorkerApiSlice';
-import authSlice from "./authSlice";
-import {api} from "./services/auth";
+import {githubApi} from "./services/github";
+import {reducer as authReducer} from "./slices/auth";
 
 const store = configureStore({
     reducer: {
-        worker: workerReducer,
-        [api.reducerPath]: api.reducer,
-        auth: authSlice,
+        [githubApi.reducerPath]: githubApi.reducer,
+        auth: authReducer,
     },
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware().concat(githubApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -1,4 +1,4 @@
-import React, {useContext, useEffect} from "react";
+import React, {useEffect} from "react";
 import 'flexlayout-react/style/light.css';
 import {Button, ButtonGroup, Dropdown, DropdownButton} from "react-bootstrap";
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar'
@@ -6,13 +6,10 @@ import {AppLayout} from "./layout";
 import {useDispatch} from "react-redux";
 import {useManagedWorker} from "../hooks/usePyodideWorker";
 import {fetchDataFromWorker} from "../api/thunks/pyodide";
-import {useServiceWorkerStore} from "../store";
 
 export const App: React.FC = () => {
     const workerUuid = useManagedWorker();
     const dispatch = useDispatch();
-
-    const serviceWorkerProxy = useServiceWorkerStore((state) => state.serviceWorker);
 
     useEffect(() => {
         (async () => {
@@ -23,18 +20,6 @@ export const App: React.FC = () => {
             }
         })();
     }, [dispatch, workerUuid])
-
-    useEffect(() => {
-        (async () => {
-            const getUserResponse = await fetch("https://api.github.com/user", {
-                headers: {
-                    accept: "application/vnd.github.v3+json",
-                }
-            });
-            const p = await getUserResponse.json();
-            console.log("LOGIN: " + JSON.stringify(p));
-        })();
-    }, []);
 
     return (
         <div>
