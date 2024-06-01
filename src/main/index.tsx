@@ -8,9 +8,10 @@ import store from "./api/store";
 import {Provider} from "react-redux";
 import {createBrowserRouter, Outlet, RouterProvider} from 'react-router-dom';
 import {MainNavbar} from "./components/MainNavbar";
+import {githubApi} from "./api/services/github";
 
 const Root: React.FC = () => {
-    return(<div>
+    return (<div className="d-flex flex-column">
         <MainNavbar/>
         <Outlet/>
     </div>);
@@ -19,7 +20,8 @@ const Root: React.FC = () => {
 window.addEventListener(
     "message",
     (event) => {
-       console.log("GOT A MESSAGE BUDDY! " + event.data);
+        console.log("GOT A MESSAGE BUDDY! " + event.data);
+        store.dispatch(githubApi.util.invalidateTags(['User']));
     },
     false,
 );
@@ -27,11 +29,11 @@ window.addEventListener(
 
 const router = createBrowserRouter([
     {
-        element: <Root />,
+        element: <Root/>,
         children: [
             {
                 path: "/",
-                element: <App />,
+                element: <App/>,
             },
         ],
     },

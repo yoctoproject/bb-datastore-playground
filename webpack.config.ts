@@ -5,19 +5,13 @@ import path from "path";
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import fs from "fs";
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
 
 const OUTPUT_PATH = './dist/';
 
 module.exports = (env: any, argv: any) => {
     const PUBLIC_PATH = argv.mode === 'production'
         ? "https://yoctoproject.github.io/bb-datastore-playground/" : "/";
-
-    const plugins = [
-        new WebpackAssetsManifest({
-            entrypoints: true,
-        }),
-        new BundleTracker({path: __dirname, filename: 'webpack-stats.json'}),
-    ];
 
     if (argv.mode !== 'production') {
         new webpack.SourceMapDevToolPlugin({
@@ -35,12 +29,6 @@ module.exports = (env: any, argv: any) => {
             'main': './src/main/index',
         },
 
-        optimization: {
-            splitChunks: {
-                chunks: "all"
-            }
-        },
-
         output: {
             path: path.resolve(__dirname, OUTPUT_PATH),
             filename: "[name]-[contenthash].js",
@@ -53,7 +41,12 @@ module.exports = (env: any, argv: any) => {
         },
 
         plugins: [
-            ...plugins,
+            new WebpackAssetsManifest({
+                entrypoints: true,
+                writeToDisk: true,
+            }),
+            new BundleTracker({path: __dirname, filename: 'webpack-stats.json'}),
+            new MiniCssExtractPlugin(),
             new webpack.ProgressPlugin(),
             new HtmlWebpackPlugin({
                 filename: path.resolve(OUTPUT_PATH, "index.html"),
@@ -65,15 +58,6 @@ module.exports = (env: any, argv: any) => {
                     {from: path.resolve(__dirname, "404.html"), to: ""},
                 ]
             }),
-            new webpack.DefinePlugin({
-                'APP_OAUTH_REDIRECT_URI': JSON.stringify(
-                    process.env.APP_OAUTH_REDIRECT_URI || "https://127.0.0.1:8080/bb-datastore-playground/oauth"
-                ),
-                'APP_OAUTH_CLIENT_ID': JSON.stringify(
-                    // Fallback to developer app client ID
-                    process.env.APP_OAUTH_CLIENT_ID || "Ov23libhHOo9ygylrdnD",
-                )
-            })
         ],
 
         module: {
@@ -90,7 +74,7 @@ module.exports = (env: any, argv: any) => {
                 },
                 {
                     test: /\.css$/,
-                    use: ["style-loader", 'css-loader', {
+                    use: [MiniCssExtractPlugin.loader, 'css-loader', {
                         loader: 'postcss-loader',
                         options: {
                             postcssOptions: {
@@ -109,7 +93,7 @@ module.exports = (env: any, argv: any) => {
                 {
                     test: /\.s[ac]ss$/i,
                     use: [
-                        "style-loader",
+                        MiniCssExtractPlugin.loader,
                         'css-loader',
                         {
                             loader: 'postcss-loader',

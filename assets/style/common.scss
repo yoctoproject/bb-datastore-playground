@@ -6,3 +6,8 @@
 nav {
   background-color: #001669;
 }
+
+.custom-tooltip {
+  background-color: violet;
+  --bs-tooltip-color: var(--bs-white);
+}
