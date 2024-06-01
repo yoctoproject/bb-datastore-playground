@@ -3,11 +3,15 @@
   --bs-nav-link-hover-color:white;
 }
 
-nav {
+.bb-main-nav {
   background-color: #001669;
 }
 
 .custom-tooltip {
   background-color: violet;
   --bs-tooltip-color: var(--bs-white);
+}
+
+body {
+  height: 100%;
 }

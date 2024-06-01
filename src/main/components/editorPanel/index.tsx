@@ -9,6 +9,13 @@ export const EditorWrapper = () => {
         editor.current.editor.getSession().setMode(new BitBakeMode());
     }, []);
 
+
+    useEffect(() => {
+        if (editor.current) {
+            editor.current.editor.renderer.attachToShadowRoot();
+        }
+    })
+
     return (
         <div>
             <AceEditor

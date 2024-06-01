@@ -1,15 +1,15 @@
 import {IJsonModel} from "flexlayout-react/src/model/IJsonModel";
 import {Layout, Model, TabNode} from "flexlayout-react";
-import React from "react";
+import React, {lazy, useRef, useState} from "react";
 import {StatusPanel} from "./statusPanel";
-import {EditorWrapper} from "./editorPanel";
 import {JQueryTerminal} from "./JQueryTerminal";
 import {RichTreeView, TreeViewBaseItem} from "@mui/x-tree-view";
-import {Allotment} from "allotment";
 import "allotment/dist/style.css";
-import Frame, {useFrame} from 'react-frame-component';
-import {Sizing} from "allotment/dist/types/src/split-view";
+import Frame from 'react-frame-component';
 import {Split} from "@geoffcox/react-splitter";
+import {EditorWrapper} from "./editorPanel";
+import {Breadcrumb} from "react-bootstrap";
+import {Allotment} from "allotment";
 
 const json: IJsonModel = {
     global: {},
@@ -100,18 +100,6 @@ function BasicRichTreeView() {
     );
 }
 
-const InnerComponent = () => {
-    // Hook returns iframe's window and document instances from Frame context
-    const {document: doc, window} = useFrame();
-    // query document of parent
-    const styleTag = document.head.querySelector("style");
-    const frameStyles = styleTag.cloneNode(true);
-
-    // doc is reference to iframe document
-    doc.head.append(frameStyles);
-    return null;
-};
-
 
 export const AppLayout: React.FC = () => {
     const factory = (node: TabNode) => {
@@ -126,21 +114,41 @@ export const AppLayout: React.FC = () => {
         }
     }
 
+    const [isResizing, setIsResizing] = useState(false);
+
+    const startResizing = () => {
+        document.body.style.userSelect = 'none';
+        setIsResizing(true);
+    };
+
+    const endResizing = () => {
+        document.body.style.userSelect = '';
+        setIsResizing(false);
+    }
+
     return (
-        <Split initialPrimarySize="20%">
+        <Allotment defaultSizes={[20, 80]} onDragStart={startResizing} onDragEnd={endResizing}>
             <BasicRichTreeView/>
             <div className="d-flex flex-column">
-                <h1>
-                    OK buddy :)
-                </h1>
-                <Frame>
-                    <Layout
-                        model={model}
-                        factory={factory}
-                    />
+                <Breadcrumb>
+                    <Breadcrumb.Item href="#">Home</Breadcrumb.Item>
+                    <Breadcrumb.Item href="https://getbootstrap.com/docs/4.0/components/breadcrumb/">
+                        Library
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item active>Data</Breadcrumb.Item>
+                </Breadcrumb>
+                <Frame className="vh-100" style={{pointerEvents: isResizing ? "none" : "auto"}}>
+                    <link href="/main.css" rel="stylesheet"/>
+                    <div className="position-relative vh-100 top-0 bottom-0">
+                        <Layout
+                            model={model}
+                            factory={factory}
+                        />
+                    </div>
                 </Frame>
             </div>
-        </Split>
+        </Allotment>
     );
+
 }
 

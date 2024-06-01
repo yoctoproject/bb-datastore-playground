@@ -13,20 +13,15 @@ module.exports = (env: any, argv: any) => {
     const PUBLIC_PATH = argv.mode === 'production'
         ? "https://yoctoproject.github.io/bb-datastore-playground/" : "/";
 
-    if (argv.mode !== 'production') {
-        new webpack.SourceMapDevToolPlugin({
-            filename: 'sourcemaps/[file].map',
-            publicPath: PUBLIC_PATH,
-        });
-
-        //plugins.push(new BundleAnalyzerPlugin());
-    }
-
     return {
         context: __dirname,
         devtool: "source-map",
         entry: {
             'main': './src/main/index',
+        },
+
+        optimization: {
+            runtimeChunk: 'single'
         },
 
         output: {
@@ -58,6 +53,10 @@ module.exports = (env: any, argv: any) => {
                     {from: path.resolve(__dirname, "404.html"), to: ""},
                 ]
             }),
+            new webpack.SourceMapDevToolPlugin({
+                filename: 'sourcemaps/[file].map',
+                publicPath: PUBLIC_PATH,
+            })
         ],
 
         module: {

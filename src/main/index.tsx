@@ -11,7 +11,7 @@ import {MainNavbar} from "./components/MainNavbar";
 import {githubApi} from "./api/services/github";
 
 const Root: React.FC = () => {
-    return (<div className="d-flex flex-column">
+    return (<div className="d-flex flex-column h-100">
         <MainNavbar/>
         <Outlet/>
     </div>);

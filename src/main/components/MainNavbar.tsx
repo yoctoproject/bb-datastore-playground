@@ -16,7 +16,7 @@ export const MainNavbar: React.FC = () => {
     console.log(data);
 
     return (
-        <Navbar variant="dark">
+        <Navbar variant="dark" className="bb-main-nav">
             <Container fluid>
                 <Navbar.Brand href="#home" className="align-items-center d-flex">
                     <svg width="64" height="64" xmlns="http://www.w3.org/2000/svg" className="pe-3">
