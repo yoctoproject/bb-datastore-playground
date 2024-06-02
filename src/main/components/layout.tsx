@@ -1,14 +1,13 @@
 import {IJsonModel} from "flexlayout-react/src/model/IJsonModel";
 import {Layout, Model, TabNode} from "flexlayout-react";
-import React, {lazy, useRef, useState} from "react";
+import React, {useRef, useState} from "react";
 import {StatusPanel} from "./statusPanel";
 import {JQueryTerminal} from "./JQueryTerminal";
 import {RichTreeView, TreeViewBaseItem} from "@mui/x-tree-view";
 import "allotment/dist/style.css";
 import Frame from 'react-frame-component';
-import {Split} from "@geoffcox/react-splitter";
 import {EditorWrapper} from "./editorPanel";
-import {Breadcrumb} from "react-bootstrap";
+import {Breadcrumb, Button} from "react-bootstrap";
 import {Allotment} from "allotment";
 
 const json: IJsonModel = {
@@ -94,11 +93,23 @@ const MUI_X_PRODUCTS: TreeViewBaseItem[] = [
     },
 ];
 
-function BasicRichTreeView() {
-    return (
-        <RichTreeView items={MUI_X_PRODUCTS}/>
-    );
-}
+const BasicRichTreeView = () => (
+    <RichTreeView items={MUI_X_PRODUCTS}/>
+);
+
+const FilePanel = () => {
+    return (<div>
+        <div className="d-flex flex-row">
+            <Button>
+                <span className="material-symbols-outlined">
+                left_panel_close
+                </span>
+            </Button>
+            <h4>Nibbles</h4>
+        </div>
+        <BasicRichTreeView/>
+    </div>);
+};
 
 
 export const AppLayout: React.FC = () => {
@@ -126,10 +137,12 @@ export const AppLayout: React.FC = () => {
         setIsResizing(false);
     }
 
+    const allotmentRef = useRef();
+
     return (
-        <Allotment defaultSizes={[20, 80]} onDragStart={startResizing} onDragEnd={endResizing}>
-            <BasicRichTreeView/>
-            <div className="d-flex flex-column">
+        <Allotment defaultSizes={[20, 80]} onDragStart={startResizing} onDragEnd={endResizing} ref={allotmentRef}>
+            <FilePanel/>
+            <div className="d-flex flex-column ps-2">
                 <Breadcrumb>
                     <Breadcrumb.Item href="#">Home</Breadcrumb.Item>
                     <Breadcrumb.Item href="https://getbootstrap.com/docs/4.0/components/breadcrumb/">
