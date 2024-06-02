@@ -13,7 +13,6 @@ export const MainNavbar: React.FC = () => {
     }
 
     const {data} = useGetUserQuery();
-    console.log(data);
 
     return (
         <Navbar variant="dark" className="bb-main-nav">

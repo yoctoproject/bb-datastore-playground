@@ -1,14 +1,16 @@
 import {IJsonModel} from "flexlayout-react/src/model/IJsonModel";
 import {Layout, Model, TabNode} from "flexlayout-react";
-import React, {useRef, useState} from "react";
+import React, {useMemo, useRef, useState} from "react";
 import {StatusPanel} from "./statusPanel";
 import {JQueryTerminal} from "./JQueryTerminal";
 import {RichTreeView, TreeViewBaseItem} from "@mui/x-tree-view";
 import "allotment/dist/style.css";
-import Frame from 'react-frame-component';
 import {EditorWrapper} from "./editorPanel";
 import {Breadcrumb, Button} from "react-bootstrap";
 import {Allotment} from "allotment";
+import * as portals from 'react-reverse-portal';
+import {InPortal, OutPortal} from 'react-reverse-portal';
+import root from 'react-shadow';
 
 const json: IJsonModel = {
     global: {},
@@ -99,23 +101,13 @@ const BasicRichTreeView = () => (
 
 const FilePanel = () => {
     return (<div>
-        <div className="d-flex flex-row">
-            <Button>
-                <span className="material-symbols-outlined">
-                left_panel_close
-                </span>
-            </Button>
-            <h4>Nibbles</h4>
-        </div>
         <BasicRichTreeView/>
     </div>);
 };
 
-
-export const AppLayout: React.FC = () => {
+const LayoutWrapper = ({isResizing}: { isResizing: boolean }) => {
     const factory = (node: TabNode) => {
         const component = node.getComponent();
-
         if (component === "terminal") {
             return <JQueryTerminal/>;
         } else if (component === "test") {
@@ -123,8 +115,21 @@ export const AppLayout: React.FC = () => {
         } else if (component === "status_panel") {
             return <StatusPanel/>;
         }
-    }
+    };
 
+    return (
+        <div className="d-flex flex-column ps-2">
+            <root.div className="vh-100" style={{pointerEvents: isResizing ? "none" : "auto"}}>
+                <link href="/main.css" rel="stylesheet"/>
+                <div className="position-relative vh-100 top-0 bottom-0">
+                    <Layout model={model} factory={factory}/>
+                </div>
+            </root.div>
+        </div>
+    );
+};
+
+export const AppLayout: React.FC = () => {
     const [isResizing, setIsResizing] = useState(false);
 
     const startResizing = () => {
@@ -137,31 +142,44 @@ export const AppLayout: React.FC = () => {
         setIsResizing(false);
     }
 
+    const portalNode = useMemo(() => portals.createHtmlPortalNode(), []);
+
+    const [isCollapsed, setIsCollapsed] = useState(false);
+
     const allotmentRef = useRef();
 
-    return (
+    const inner = isCollapsed ? (<OutPortal
+        node={portalNode}/>) : (
         <Allotment defaultSizes={[20, 80]} onDragStart={startResizing} onDragEnd={endResizing} ref={allotmentRef}>
             <FilePanel/>
-            <div className="d-flex flex-column ps-2">
-                <Breadcrumb>
-                    <Breadcrumb.Item href="#">Home</Breadcrumb.Item>
-                    <Breadcrumb.Item href="https://getbootstrap.com/docs/4.0/components/breadcrumb/">
-                        Library
-                    </Breadcrumb.Item>
-                    <Breadcrumb.Item active>Data</Breadcrumb.Item>
-                </Breadcrumb>
-                <Frame className="vh-100" style={{pointerEvents: isResizing ? "none" : "auto"}}>
-                    <link href="/main.css" rel="stylesheet"/>
-                    <div className="position-relative vh-100 top-0 bottom-0">
-                        <Layout
-                            model={model}
-                            factory={factory}
-                        />
-                    </div>
-                </Frame>
-            </div>
+            <OutPortal
+                node={portalNode}/>
         </Allotment>
     );
 
+    return (
+        <>
+            <InPortal node={portalNode}>
+                <LayoutWrapper isResizing={isResizing}/>
+            </InPortal>
+
+            <div className="d-flex flex-column flex-grow-1">
+                <div className="d-flex flex-row align-items-center">
+                    <Button size="sm" onClick={() => setIsCollapsed((prev) => !prev)}>
+                        <span className="material-symbols-outlined">left_panel_close</span>
+                    </Button>
+                    <h4 className="mb-0">Nibbles</h4>
+                    <Breadcrumb>
+                        <Breadcrumb.Item href="#">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="https://getbootstrap.com/docs/4.0/components/breadcrumb/">
+                            Library
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item active>Data</Breadcrumb.Item>
+                    </Breadcrumb>
+                </div>
+                {inner}
+            </div>
+        </>
+    )
 }
 
