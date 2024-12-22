@@ -110,7 +110,15 @@ module.exports = (env: any, argv: any) => {
                             },
                         },
                         // Compiles Sass to CSS
-                        "sass-loader",
+                        {
+                            loader: "sass-loader",
+                            options: {
+                                api: "modern",
+                                sassOptions: {
+                                    // Your sass options
+                                },
+                            },
+                        },
                     ],
                 },
                 {
@@ -142,14 +150,14 @@ module.exports = (env: any, argv: any) => {
                 rewrites: [{ from: /\/bb-datastore-playground\/[^?]/, to: '/404.html' }],
             },
             open: "bb-datastore-playground",
-            server: {
-                type: "https",
-                options: {
-                    key: fs.readFileSync("cert.key"),
-                    cert: fs.readFileSync("cert.crt"),
-                    ca: fs.readFileSync("ca.crt"),
-                },
-            }
+            // server: {
+            //     type: "https",
+            //     options: {
+            //         key: fs.readFileSync("cert.key"),
+            //         cert: fs.readFileSync("cert.crt"),
+            //         ca: fs.readFileSync("ca.crt"),
+            //     },
+            // }
         }
     }
 }
