@@ -3,7 +3,7 @@
     "fully supports es6-module-dynamic-import"
   ],
   "engines": {
-    "node": "18.x"
+    "node": "21.x"
   },
   "scripts": {
     "build": "webpack",
