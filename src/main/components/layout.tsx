@@ -9,6 +9,7 @@ import {EditorWrapper} from "./editorPanel";
 import {Breadcrumb, Button} from "react-bootstrap";
 import {Allotment} from "allotment";
 import root from 'react-shadow';
+import {PlaygroundTerminal} from "./PlaygroundTerminal";
 
 const json: IJsonModel = {
     global: {},
@@ -107,7 +108,7 @@ const LayoutWrapper = ({isResizing}: { isResizing: boolean }) => {
     const factory = (node: TabNode) => {
         const component = node.getComponent();
         if (component === "terminal") {
-            return <JQueryTerminal/>;
+            return <PlaygroundTerminal/>;
         } else if (component === "test") {
             return <EditorWrapper/>;
         } else if (component === "status_panel") {
