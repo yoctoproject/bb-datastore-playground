@@ -2,17 +2,16 @@ import React from "react";
 import {Button, Container, Navbar, NavDropdown, OverlayTrigger, Tooltip} from "react-bootstrap";
 import {Link} from "react-router-dom";
 import {useGetUserQuery, useLogoutMutation} from "../api/services/github";
-import {useSelector} from "react-redux";
+import {ProfileImage} from "./ProfileImage";
 
 export const MainNavbar: React.FC = () => {
-    const isLoggedIn = useSelector(state => state.auth.isLoggedIn === "yes");
-    const [logout, {isLoading, isSuccess, isError}] = useLogoutMutation();
+    const {isSuccess: isLoggedIn} = useGetUserQuery();
+
+    const [logout] = useLogoutMutation();
 
     const handleLogout = async () => {
         await logout().unwrap();
     }
-
-    const {data} = useGetUserQuery();
 
     return (
         <Navbar variant="dark" className="bb-main-nav">
@@ -50,8 +49,7 @@ export const MainNavbar: React.FC = () => {
                         </OverlayTrigger>
                     )}
                     {isLoggedIn && (
-                        <NavDropdown title={<img src={data?.avatar_url || ""} alt="mdo" width="48" height="48"
-                                                 className="rounded-circle"/>} align="end">
+                        <NavDropdown title={<ProfileImage/>} align="end">
                             <NavDropdown.Item onClick={handleLogout}>Sign out</NavDropdown.Item>
                         </NavDropdown>
                     )}

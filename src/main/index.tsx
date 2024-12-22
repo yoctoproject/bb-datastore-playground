@@ -20,8 +20,10 @@ const Root: React.FC = () => {
 window.addEventListener(
     "message",
     (event) => {
-        console.log("GOT A MESSAGE BUDDY! " + event.data);
-        store.dispatch(githubApi.util.invalidateTags(['User']));
+        if (event.data["loggedIn"]) {
+            console.log("GOT A MESSAGE BUDDY! " + JSON.stringify(event.data));
+            store.dispatch(githubApi.util.invalidateTags(['User']));
+        }
     },
     false,
 );

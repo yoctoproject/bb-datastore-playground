@@ -8,8 +8,6 @@ import "allotment/dist/style.css";
 import {EditorWrapper} from "./editorPanel";
 import {Breadcrumb, Button} from "react-bootstrap";
 import {Allotment} from "allotment";
-import * as portals from 'react-reverse-portal';
-import {InPortal, OutPortal} from 'react-reverse-portal';
 import root from 'react-shadow';
 
 const json: IJsonModel = {
@@ -120,6 +118,7 @@ const LayoutWrapper = ({isResizing}: { isResizing: boolean }) => {
     return (
         <div className="d-flex flex-column ps-2">
             <root.div className="vh-100" style={{pointerEvents: isResizing ? "none" : "auto"}}>
+                {/*TODO: don't hardcode path*/}
                 <link href="/main.css" rel="stylesheet"/>
                 <div className="position-relative vh-100 top-0 bottom-0">
                     <Layout model={model} factory={factory}/>
@@ -142,42 +141,40 @@ export const AppLayout: React.FC = () => {
         setIsResizing(false);
     }
 
-    const portalNode = useMemo(() => portals.createHtmlPortalNode(), []);
-
     const [isCollapsed, setIsCollapsed] = useState(false);
-
     const allotmentRef = useRef();
 
-    const inner = isCollapsed ? (<OutPortal
-        node={portalNode}/>) : (
-        <Allotment defaultSizes={[20, 80]} onDragStart={startResizing} onDragEnd={endResizing} ref={allotmentRef}>
-            <FilePanel/>
-            <OutPortal
-                node={portalNode}/>
-        </Allotment>
-    );
+    const breadcrumbs = (<Breadcrumb>
+        <Breadcrumb.Item href="#">Home</Breadcrumb.Item>
+        <Breadcrumb.Item href="https://getbootstrap.com/docs/4.0/components/breadcrumb/">
+            Library
+        </Breadcrumb.Item>
+        <Breadcrumb.Item active>Data</Breadcrumb.Item>
+    </Breadcrumb>);
+
+    const button = (
+        <><Button size="sm" onClick={() => setIsCollapsed((prev) => !prev)}>
+        <span className="material-symbols-outlined">left_panel_close</span>
+    </Button>
+    <h4 className="mb-0">Nibbles</h4></>);
 
     return (
         <>
-            <InPortal node={portalNode}>
-                <LayoutWrapper isResizing={isResizing}/>
-            </InPortal>
-
             <div className="d-flex flex-column flex-grow-1">
                 <div className="d-flex flex-row align-items-center">
-                    <Button size="sm" onClick={() => setIsCollapsed((prev) => !prev)}>
-                        <span className="material-symbols-outlined">left_panel_close</span>
-                    </Button>
-                    <h4 className="mb-0">Nibbles</h4>
-                    <Breadcrumb>
-                        <Breadcrumb.Item href="#">Home</Breadcrumb.Item>
-                        <Breadcrumb.Item href="https://getbootstrap.com/docs/4.0/components/breadcrumb/">
-                            Library
-                        </Breadcrumb.Item>
-                        <Breadcrumb.Item active>Data</Breadcrumb.Item>
-                    </Breadcrumb>
+                    {isCollapsed && button}
+                    {isCollapsed && breadcrumbs}
                 </div>
-                {inner}
+                <Allotment defaultSizes={[20, 80]} onDragStart={startResizing} onDragEnd={endResizing} ref={allotmentRef}>
+                    <Allotment.Pane visible={!isCollapsed}>
+                        {!isCollapsed && button}
+                        <FilePanel/>
+                    </Allotment.Pane>
+                    <Allotment.Pane>
+                        {!isCollapsed && breadcrumbs}
+                        <LayoutWrapper isResizing={isResizing}/>
+                    </Allotment.Pane>
+                </Allotment>
             </div>
         </>
     )

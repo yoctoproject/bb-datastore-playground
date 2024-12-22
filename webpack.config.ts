@@ -15,7 +15,7 @@ module.exports = (env: any, argv: any) => {
 
     return {
         context: __dirname,
-        devtool: "source-map",
+        devtool: "inline-source-map",
         entry: {
             'main': './src/main/index',
         },
