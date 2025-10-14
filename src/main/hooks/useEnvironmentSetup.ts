@@ -55,16 +55,24 @@ export const useEnvironmentSetup = () => {
     const effectStatus = useRef<InternalStatus>(InternalStatus.NotRun);
 
     useEffect(() => {
-        if (pyodideStatus === PyodideStatus.Done && progress === 100 && effectStatus.current === InternalStatus.NotRun) {
+        if (pyodide === null) {
+            return;
+        }
+        const canStartEnvironmentSetup =
+            pyodideStatus === PyodideStatus.Done &&
+            progress === 100 &&
+            effectStatus.current === InternalStatus.NotRun;
+
+        if (canStartEnvironmentSetup) {
             effectStatus.current = InternalStatus.Running;
             const f = async () => {
                 dispatch({type: "environmentStatusChanged", environmentStatus: EnvironmentStatus.LoadingSqlite3});
                 await pyodide.loadPackage("sqlite3");
-                dispatch({type: "environmentStatusChanged", pyodideStatus: EnvironmentStatus.UnpackingBitbake});
+                dispatch({type: "environmentStatusChanged", environmentStatus: EnvironmentStatus.UnpackingBitbake});
                 pyodide.unpackArchive(data, "zip", {
                     extractDir: "bb"
                 });
-                dispatch({type: "environmentStatusChanged", pyodideStatus: EnvironmentStatus.Configuring});
+                dispatch({type: "environmentStatusChanged", environmentStatus: EnvironmentStatus.Configuring});
 
                 pyodide.runPython(`
 import os.path
@@ -183,7 +191,7 @@ print(sys.meta_path)
                 pyodide.runPython(`
                     import sys
                     sys.path.insert(0, "./bb/bitbake-2.8.0/lib/")
-                    from bb.data_smart import DataSmart    
+                    from bb.data_smart import DataSmart
                 `)
 
                 dispatch({type: "environmentStatusChanged", environmentStatus: EnvironmentStatus.Ready});
