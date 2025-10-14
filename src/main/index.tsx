@@ -1,5 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../../assets/style/common.scss';
+import '../styles/common.scss';
 
 import {createRoot} from "react-dom/client";
 import {App} from "./components/App";
@@ -40,7 +40,7 @@ const router = createBrowserRouter([
         ],
     },
 ], {
-    basename: "/bb-datastore-playground",
+    basename: import.meta.env.BASE_URL,
 });
 
 const container = document.getElementById("root");

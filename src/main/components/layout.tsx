@@ -1,6 +1,6 @@
 import {IJsonModel} from "flexlayout-react/src/model/IJsonModel";
 import {Layout, Model, TabNode} from "flexlayout-react";
-import React, {useMemo, useRef, useState} from "react";
+import React, {useRef, useState} from "react";
 import {StatusPanel} from "./statusPanel";
 import {JQueryTerminal} from "./JQueryTerminal";
 import {RichTreeView, TreeViewBaseItem} from "@mui/x-tree-view";
@@ -10,6 +10,9 @@ import {Breadcrumb, Button} from "react-bootstrap";
 import {Allotment} from "allotment";
 import root from 'react-shadow';
 import {PlaygroundTerminal} from "./PlaygroundTerminal";
+import bootstrapStylesheetUrl from "bootstrap/dist/css/bootstrap.min.css?url";
+import allotmentStylesheetUrl from "allotment/dist/style.css?url";
+import mainStylesheetUrl from "../../styles/common.scss?url";
 
 const json: IJsonModel = {
     global: {},
@@ -119,8 +122,9 @@ const LayoutWrapper = ({isResizing}: { isResizing: boolean }) => {
     return (
         <div className="d-flex flex-column ps-2">
             <root.div className="vh-100" style={{pointerEvents: isResizing ? "none" : "auto"}}>
-                {/*TODO: don't hardcode path*/}
-                <link href="/main.css" rel="stylesheet"/>
+                <link href={bootstrapStylesheetUrl} rel="stylesheet"/>
+                <link href={allotmentStylesheetUrl} rel="stylesheet"/>
+                <link href={mainStylesheetUrl} rel="stylesheet"/>
                 <div className="position-relative vh-100 top-0 bottom-0">
                     <Layout model={model} factory={factory}/>
                 </div>
@@ -180,4 +184,3 @@ export const AppLayout: React.FC = () => {
         </>
     )
 }
-

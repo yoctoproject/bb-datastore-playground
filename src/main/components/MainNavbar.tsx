@@ -8,6 +8,7 @@ export const MainNavbar: React.FC = () => {
     const {isSuccess: isLoggedIn} = useGetUserQuery();
 
     const [logout] = useLogoutMutation();
+    const logoHref = `${import.meta.env.BASE_URL}assets/images/BBDatastorePlaygroundLogo.svg`;
 
     const handleLogout = async () => {
         await logout().unwrap();
@@ -18,7 +19,7 @@ export const MainNavbar: React.FC = () => {
             <Container fluid>
                 <Navbar.Brand href="#home" className="align-items-center d-flex">
                     <svg width="64" height="64" xmlns="http://www.w3.org/2000/svg" className="pe-3">
-                        <image href="/assets/images/BBDatastorePlaygroundLogo.svg" height="64" width="64"/>
+                        <image href={logoHref} height="64" width="64"/>
                     </svg>
                     {' '}
                     BB Datastore Playground
