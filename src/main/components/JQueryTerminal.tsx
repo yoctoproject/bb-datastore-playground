@@ -1,7 +1,30 @@
 import React, {forwardRef, useEffect, useImperativeHandle, useRef} from "react";
 import $ from "jquery";
-import 'jquery.terminal';
+import jqueryTerminalFactory from "jquery.terminal";
+
 import 'jquery.terminal/css/jquery.terminal.min.css';
+import jqueryTerminalStylesheetUrl from "jquery.terminal/css/jquery.terminal.min.css?url";
+
+type JQueryStatic = typeof $;
+
+const globalScope = globalThis as typeof globalThis & {
+    $?: JQueryStatic;
+    jQuery?: JQueryStatic;
+};
+
+if (!globalScope.$) {
+    globalScope.$ = $;
+}
+
+if (!globalScope.jQuery) {
+    globalScope.jQuery = $;
+}
+
+const maybeInitTerminal = jqueryTerminalFactory as unknown as ((root?: typeof globalThis, jQuery?: JQueryStatic) => void) | undefined;
+
+if (typeof maybeInitTerminal === "function") {
+    maybeInitTerminal(globalScope, $);
+}
 
 interface Props {
     interpreter?: TypeOrArray<JQueryTerminal.Interpreter>,
@@ -57,5 +80,10 @@ export const JQueryTerminal: React.ForwardRefExoticComponent<React.PropsWithoutR
         };
     }, [props.interpreter, props.options]);
 
-    return (<div ref={terminalContainerRef} style={{height: '600px'}}></div>);
+    return (
+        <>
+            <link href={jqueryTerminalStylesheetUrl} rel="stylesheet"/>
+            <div ref={terminalContainerRef} style={{height: '600px'}}></div>
+        </>
+    );
 });

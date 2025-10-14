@@ -10,9 +10,12 @@ import {Breadcrumb, Button} from "react-bootstrap";
 import {Allotment} from "allotment";
 import root from 'react-shadow';
 import {PlaygroundTerminal} from "./PlaygroundTerminal";
+
 import bootstrapStylesheetUrl from "bootstrap/dist/css/bootstrap.min.css?url";
 import allotmentStylesheetUrl from "allotment/dist/style.css?url";
 import mainStylesheetUrl from "../../styles/common.scss?url";
+import jqueryTerminalStylesheetUrl from "jquery.terminal/css/jquery.terminal.min.css?url";
+import flexLayoutStylesheetUrl from "flexlayout-react/style/light.css?url";
 
 const json: IJsonModel = {
     global: {},
@@ -125,6 +128,8 @@ const LayoutWrapper = ({isResizing}: { isResizing: boolean }) => {
                 <link href={bootstrapStylesheetUrl} rel="stylesheet"/>
                 <link href={allotmentStylesheetUrl} rel="stylesheet"/>
                 <link href={mainStylesheetUrl} rel="stylesheet"/>
+                <link href={jqueryTerminalStylesheetUrl} rel="stylesheet"/>
+                <link href={flexLayoutStylesheetUrl} rel="stylesheet"/>
                 <div className="position-relative vh-100 top-0 bottom-0">
                     <Layout model={model} factory={factory}/>
                 </div>
