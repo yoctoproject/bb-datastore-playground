@@ -32,7 +32,7 @@ export const MainNavbar: React.FC = () => {
                     >
                         about
                     </Link>
-
+{/*
                     {!isLoggedIn && (
                         <OverlayTrigger placement="auto-start"
                                         overlay={<Tooltip className="custom-tooltip">Gists!</Tooltip>}>
@@ -53,7 +53,7 @@ export const MainNavbar: React.FC = () => {
                         <NavDropdown title={<ProfileImage/>} align="end">
                             <NavDropdown.Item onClick={handleLogout}>Sign out</NavDropdown.Item>
                         </NavDropdown>
-                    )}
+                    )} */}
                 </div>
             </Container>
         </Navbar>
