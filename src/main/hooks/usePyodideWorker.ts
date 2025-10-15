@@ -17,7 +17,9 @@ export const useManagedWorker = () => {
             }
         };
 
-        initWorker();
+        if (workerUuid === null) {
+            void initWorker();
+        }
 
         return () => {
             if (workerUuid) {
@@ -25,7 +27,7 @@ export const useManagedWorker = () => {
             }
             isActive = false;
         };
-    }, [dispatch]);
+    }, [dispatch, workerUuid]);
 
     return workerUuid;
 };
