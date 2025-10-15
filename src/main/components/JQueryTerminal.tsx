@@ -56,6 +56,22 @@ export const JQueryTerminal: React.ForwardRefExoticComponent<React.PropsWithoutR
             exec: (str: string) => {
                 terminalObjectRef.current?.exec(str);
             },
+            beforeCursor: () => {
+                return terminalObjectRef.current?.before_cursor();
+            },
+            insert: (text: string) => {
+                terminalObjectRef.current?.insert(text);
+            },
+            enter: () => {
+                terminalObjectRef.current?.enter();
+            },
+            setCommand: (value: string) => {
+                terminalObjectRef.current?.set_command(value);
+            },
+            error: (message: string) => {
+                terminalObjectRef.current?.error(message);
+            },
+            getInstance: () => terminalObjectRef.current,
             setInterpreter: (interpreter?: TypeOrArray<JQueryTerminal.Interpreter>) => {
                 if (terminalObjectRef.current) {
                     terminalObjectRef.current.set_interpreter(interpreter);

@@ -1,8 +1,41 @@
 import {JQueryTerminal} from "./JQueryTerminal";
-import React, {useEffect, useRef} from "react";
+import React, {useEffect, useMemo, useRef} from "react";
 import {EnvironmentStatus, useEnvironmentSetup} from "../hooks/useEnvironmentSetup";
 import {PyodideStatus} from "../hooks/usePyodide";
 import type {PyodideInterface} from "pyodide";
+
+const PS1 = ">>> ";
+const PS2 = "... ";
+
+type TerminalHandle = {
+    echo: (message: string, options?: JQueryTerminal.animationOptions & JQueryTerminal.EchoOptions) => void;
+    freeze: (toggle?: boolean) => void;
+    setPrompt: (prompt: string) => void;
+    exec: (command: string) => void;
+    setInterpreter: (interpreter: JQueryTerminal.Interpreter) => void;
+    setCommand: (value: string) => void;
+    beforeCursor?: () => string;
+    insert?: (text: string) => void;
+    enter: () => void;
+    getInstance: () => JQueryTerminal | null;
+};
+
+type PyodideConsoleLike = {
+    complete: (command: string) => {
+        toJs(): [string[], unknown];
+        destroy?: () => void;
+    };
+    buffer: {
+        clear: () => void;
+    };
+    push: (command: string) => {
+        syntax_check: string;
+        formatted_error?: string;
+        destroy: () => void;
+    };
+    stdout_callback?: (value: string, options?: { newline?: boolean }) => void;
+    stderr_callback?: (value: string) => void;
+};
 
 // Taken from https://terminal.jcubic.pl/examples.php
 function progress(percent, width) {
@@ -25,9 +58,45 @@ function sleep(s) {
     return new Promise((resolve) => setTimeout(resolve, s));
 }
 
-function create_interpreter(pyodide: PyodideInterface, term: JQueryTerminal) {
+function create_interpreter(
+    pyodide: PyodideInterface,
+    term: JQueryTerminal,
+    onConsoleReady: (consoleProxy: PyodideConsoleLike) => void,
+) {
     let {repr_shorten, PyodideConsole} = pyodide.pyimport("pyodide.console");
-    const pyconsole = PyodideConsole(pyodide.globals);
+    const pyconsole = PyodideConsole(pyodide.globals) as unknown as PyodideConsoleLike & {
+        stdout_callback: (value: string, options?: { newline?: boolean }) => void;
+        stderr_callback: (value: string) => void;
+    };
+    if (!term.ready) {
+        term.ready = Promise.resolve();
+    }
+    onConsoleReady(pyconsole);
+
+    const pyodideInternal = pyodide as unknown as {
+        _api?: {
+            on_fatal?: (error: Error & { name?: string }) => void;
+        };
+        version?: string;
+    };
+    if (pyodideInternal?._api) {
+        pyodideInternal._api.on_fatal = async (error) => {
+            const errorMessage = String(error);
+            if (error.name === "Exit") {
+                term.error(error as unknown as string);
+                term.error("Pyodide exited and can no longer be used.");
+            } else {
+                term.error("Pyodide has suffered a fatal error.");
+                term.error("The cause of the fatal error was:");
+                term.error(errorMessage);
+                term.error("Look in the browser console for more details.");
+            }
+            await term.ready;
+            term.pause();
+            await sleep(15);
+            term.pause();
+        };
+    }
 
     const namespace = pyodide.globals.get("dict")();
     const await_fut = pyodide.runPython(
@@ -64,9 +133,6 @@ function create_interpreter(pyodide: PyodideInterface, term: JQueryTerminal) {
         return resolve;
     }
 
-    const ps1 = ">>> ";
-    const ps2 = "... ";
-
     async function interpreter(command, term: JQueryTerminal) {
         const unlock = await lock();
         term.pause();
@@ -74,7 +140,7 @@ function create_interpreter(pyodide: PyodideInterface, term: JQueryTerminal) {
         for (const c of command.split("\n")) {
             const escaped = c.replaceAll(/\u00a0/g, " ");
             const fut = pyconsole.push(escaped);
-            term.set_prompt(fut.syntax_check === "incomplete" ? ps2 : ps1);
+            term.set_prompt(fut.syntax_check === "incomplete" ? PS2 : PS1);
             switch (fut.syntax_check) {
                 case "syntax-error":
                     term.error(fut.formatted_error.trimEnd());
@@ -84,7 +150,7 @@ function create_interpreter(pyodide: PyodideInterface, term: JQueryTerminal) {
                 case "complete":
                     break;
                 default:
-                    throw new Error(`Unexpected type ${ty}`);
+                    throw new Error(`Unexpected type ${fut.syntax_check}`);
             }
             // In JavaScript, await automatically also awaits any results of
             // awaits, so if an async function returns a future, it will await
@@ -130,17 +196,77 @@ function create_interpreter(pyodide: PyodideInterface, term: JQueryTerminal) {
 }
 
 export const PlaygroundTerminal: React.FC = () => {
-    const terminalRef = useRef(null);
+    const terminalRef = useRef<TerminalHandle | null>(null);
 
     const {state, pyodide} = useEnvironmentSetup();
 
     const setupComplete = useRef<boolean>(false);
+    const initialMessagePrinted = useRef(false);
+    const pyconsoleRef = useRef<PyodideConsoleLike | null>(null);
+    const PS1 = ">>> ";
+    const PS2 = "... ";
+
+    const completionHandler = useMemo(
+        () => (command: string, callback: (result: string[]) => void) => {
+            const pyconsole = pyconsoleRef.current;
+            if (!pyconsole) {
+                callback([]);
+                return;
+            }
+            try {
+                const completionProxy = pyconsole.complete(command);
+                // toJs returns [completions, cursor]
+                const [completions] = completionProxy.toJs();
+                completionProxy.destroy?.();
+                callback(completions ?? []);
+            } catch (error) {
+                console.warn("Completion failed", error);
+                callback([]);
+            }
+        },
+        [],
+    );
+
+    const terminalOptions = useMemo(() => ({
+        completionEscape: false,
+        completion: completionHandler,
+        keymap: {
+            "CTRL+C": () => {
+                const pyconsole = pyconsoleRef.current;
+                const term = terminalRef.current;
+                if (!pyconsole || !term) {
+                    return;
+                }
+                pyconsole.buffer.clear();
+                term.enter();
+                term.echo("KeyboardInterrupt");
+                term.setCommand("");
+                term.setPrompt(PS1);
+            },
+            TAB: (event: KeyboardEvent, original: (event: KeyboardEvent) => unknown) => {
+                const term = terminalRef.current;
+                if (!term) {
+                    return original(event);
+                }
+                const command = term.beforeCursor?.() ?? "";
+                if (command.trim() === "") {
+                    term.insert?.("\t");
+                    return false;
+                }
+                return original(event);
+            },
+        },
+    }), [completionHandler]);
 
     useEffect(() => {
+        if (initialMessagePrinted.current) {
+            return;
+        }
         terminalRef.current.echo("Setting up environment...");
         terminalRef.current.freeze(true);
         terminalRef.current.setPrompt("");
-    }, [])
+        initialMessagePrinted.current = true;
+    }, []);
 
     useEffect(() => {
         if (state.environmentStatus === EnvironmentStatus.WaitBitbakeOrPyodide) {
@@ -192,24 +318,35 @@ export const PlaygroundTerminal: React.FC = () => {
                     if (!setupComplete.current) {
                         setupComplete.current = true;
 
-                        terminalRef.current.setInterpreter(create_interpreter(pyodide, terminalRef.current));
+                        const termHandle = terminalRef.current;
+                        if (!termHandle) {
+                            return;
+                        }
+                        const termInstance = termHandle.getInstance();
+                        if (!termInstance) {
+                            return;
+                        }
+                        const interpreter = create_interpreter(pyodide, termInstance, (consoleProxy) => {
+                            pyconsoleRef.current = consoleProxy;
+                        });
+                        termHandle.setInterpreter(interpreter);
 
                         terminalRef.current.echo("Ready :)\n");
-                        terminalRef.current.setPrompt(">>> ");
-                        terminalRef.current.exec("d = DataSmart()")
-                        terminalRef.current.exec(`d.setVar('P', 'Are you \${MOD} \${ADJ}')`);
-                        terminalRef.current.exec(`d.setVar('MOD', 'not')`);
-                        terminalRef.current.exec(`d.setVar('ADJ', 'enter')`);
-                        terminalRef.current.exec(`d.setVar('ADJ:append', 'tained')`);
-                        terminalRef.current.exec(`d.setVar('P:append', '?')`);
-                        terminalRef.current.exec(`print(d.expand("\${P}"))`);
+                        termHandle.setPrompt(PS1);
+                        termHandle.exec("d = DataSmart()")
+                        termHandle.exec(`d.setVar('P', 'Are you \${MOD} \${ADJ}')`);
+                        termHandle.exec(`d.setVar('MOD', 'not')`);
+                        termHandle.exec(`d.setVar('ADJ', 'enter')`);
+                        termHandle.exec(`d.setVar('ADJ:append', 'tained')`);
+                        termHandle.exec(`d.setVar('P:append', '?')`);
+                        termHandle.exec(`print(d.expand("\${P}"))`);
 
-                        terminalRef.current.freeze(false);
+                        termHandle.freeze(false);
                     }
                     break;
             }
         }
     }, [pyodide, state]);
 
-    return (<JQueryTerminal ref={terminalRef}/>)
+    return (<JQueryTerminal ref={terminalRef} options={terminalOptions}/>)
 }
