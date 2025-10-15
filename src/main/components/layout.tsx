@@ -170,7 +170,7 @@ export const AppLayout: React.FC = () => {
 
     return (
         <>
-            <div className="d-flex flex-column flex-grow-1">
+            {/* <div className="d-flex flex-column flex-grow-1">
                 <div className="d-flex flex-row align-items-center">
                     {isCollapsed && button}
                     {isCollapsed && breadcrumbs}
@@ -182,10 +182,12 @@ export const AppLayout: React.FC = () => {
                     </Allotment.Pane>
                     <Allotment.Pane>
                         {!isCollapsed && breadcrumbs}
-                        <LayoutWrapper isResizing={isResizing}/>
+
                     </Allotment.Pane>
                 </Allotment>
-            </div>
+            </div> */}
+            <LayoutWrapper isResizing={isResizing}/>
+            {/* </div> */}
         </>
     )
 }
