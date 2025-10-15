@@ -1,0 +1,21 @@
+.nav-link {
+  --bs-nav-link-color: rgba(255, 255, 255, 0.85);
+  --bs-nav-link-hover-color:white;
+}
+
+.bb-main-nav {
+  background-color: #001669;
+}
+
+.custom-tooltip {
+  background-color: violet;
+  --bs-tooltip-color: var(--bs-white);
+}
+
+body {
+  height: 100%;
+}
+
+.breadcrumb {
+  --bs-breadcrumb-margin-bottom: 0;
+}

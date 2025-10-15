@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 
-import {PyodideInterface} from "pyodide";
+import type {PyodideInterface} from "pyodide";
 
 let cachedInstance: PyodideInterface = null;
 

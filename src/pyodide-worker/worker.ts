@@ -42,7 +42,7 @@ export class MyWorker {
     }
 
     async test() {
-        console.log("OK");
+        console.log("test() from the worker :)");
         await printAll("callback!");
     }
 

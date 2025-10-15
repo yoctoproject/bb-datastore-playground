@@ -2,7 +2,7 @@ import {JQueryTerminal} from "./JQueryTerminal";
 import React, {useEffect, useRef} from "react";
 import {EnvironmentStatus, useEnvironmentSetup} from "../hooks/useEnvironmentSetup";
 import {PyodideStatus} from "../hooks/usePyodide";
-import {PyodideInterface} from "pyodide";
+import type {PyodideInterface} from "pyodide";
 
 // Taken from https://terminal.jcubic.pl/examples.php
 function progress(percent, width) {
