@@ -71,6 +71,9 @@ export const JQueryTerminal: React.ForwardRefExoticComponent<React.PropsWithoutR
             error: (message: string) => {
                 terminalObjectRef.current?.error(message);
             },
+            focus: (silent?: boolean) => {
+                terminalObjectRef.current?.focus(silent);
+            },
             getInstance: () => terminalObjectRef.current,
             setInterpreter: (interpreter?: TypeOrArray<JQueryTerminal.Interpreter>) => {
                 if (terminalObjectRef.current) {
@@ -87,8 +90,17 @@ export const JQueryTerminal: React.ForwardRefExoticComponent<React.PropsWithoutR
             greetings: BANNER,
             ...props.options
         });
+        const focusTerminal = () => {
+            terminalObjectRef.current?.focus(true);
+        };
+        const container = terminalContainerRef.current as HTMLElement | null;
+        container?.addEventListener("mousedown", focusTerminal);
+        container?.addEventListener("focusin", focusTerminal);
+        terminalObjectRef.current?.focus(true);
 
         return () => {
+            container?.removeEventListener("mousedown", focusTerminal);
+            container?.removeEventListener("focusin", focusTerminal);
             if (obj) {
                 obj.destroy();
                 terminalObjectRef.current = null;

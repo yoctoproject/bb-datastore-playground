@@ -18,6 +18,7 @@ type TerminalHandle = {
     insert?: (text: string) => void;
     enter: () => void;
     getInstance: () => JQueryTerminal | null;
+    focus?: (silent?: boolean) => void;
 };
 
 type PyodideConsoleLike = {
@@ -342,6 +343,7 @@ export const PlaygroundTerminal: React.FC = () => {
                         termHandle.exec(`print(d.expand("\${P}"))`);
 
                         termHandle.freeze(false);
+                        termHandle.focus?.(false);
                     }
                     break;
             }
