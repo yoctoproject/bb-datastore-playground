@@ -5,7 +5,7 @@
     "fully supports es6-module-dynamic-import"
   ],
   "engines": {
-    "node": "21.x"
+    "node": "22.x"
   },
   "scripts": {
     "dev": "vite",
@@ -30,7 +30,7 @@
     "postcss": "^8.4.49",
     "sass": "^1.83.0",
     "typescript": "^5.7.2",
-    "vite": "^5.4.9"
+    "vite": "^7.2.4"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
