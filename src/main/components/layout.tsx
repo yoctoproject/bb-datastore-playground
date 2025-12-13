@@ -2,7 +2,6 @@ import {IJsonModel} from "flexlayout-react/src/model/IJsonModel";
 import {Layout, Model, TabNode} from "flexlayout-react";
 import React, {useRef, useState} from "react";
 import {StatusPanel} from "./statusPanel";
-import {JQueryTerminal} from "./JQueryTerminal";
 import {RichTreeView, TreeViewBaseItem} from "@mui/x-tree-view";
 import "allotment/dist/style.css";
 import {EditorWrapper} from "./editorPanel";
@@ -10,6 +9,7 @@ import {Breadcrumb, Button} from "react-bootstrap";
 import {Allotment} from "allotment";
 import root from 'react-shadow';
 import {PlaygroundTerminal} from "./PlaygroundTerminal";
+import {usePyodideWorker} from "../hooks/usePyodideWorker";
 
 import bootstrapStylesheetUrl from "bootstrap/dist/css/bootstrap.min.css?url";
 import allotmentStylesheetUrl from "allotment/dist/style.css?url";
@@ -111,10 +111,18 @@ const FilePanel = () => {
 };
 
 const LayoutWrapper = ({isResizing}: { isResizing: boolean }) => {
+    const {status, client, prepared} = usePyodideWorker();
+
     const factory = (node: TabNode) => {
         const component = node.getComponent();
         if (component === "terminal") {
-            return <PlaygroundTerminal/>;
+            if (!client || status === "error") {
+                return <div className="p-3">Pyodide failed to start.</div>;
+            }
+            if (!prepared || status !== "ready") {
+                return <div className="p-3">Pyodide is starting...</div>;
+            }
+            return <PlaygroundTerminal client={client}/>;
         } else if (component === "test") {
             return <EditorWrapper/>;
         } else if (component === "status_panel") {
