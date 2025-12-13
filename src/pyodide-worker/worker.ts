@@ -21,14 +21,14 @@ async function loadPyodideAndPackages() {
     await self.pyodide.loadPackage(["sqlite3"]);
 }
 
-let the_func = [
+let progressCallbacks = [
     async (str) => {
         console.log(str);
     }
 ];
 
 const printAll = async (str) => {
-    await Promise.all(the_func.map(f => f(str)));
+    await Promise.all(progressCallbacks.map(f => f(str)));
 }
 
 export class MyWorker {
@@ -41,8 +41,7 @@ export class MyWorker {
     #await_fut: any = null;
 
     async setProgressCallback(func) {
-        the_func.push(func);
-        console.log(the_func);
+        progressCallbacks.push(func);
     }
 
     async test() {
