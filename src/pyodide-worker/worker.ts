@@ -190,11 +190,36 @@ sys.meta_path.append(BuiltinImporterShim())
 
 print(sys.meta_path)
         `)
-        self.pyodide.runPython(`
-                    import sys
-                    sys.path.insert(0, "./bb/bitbake-${version}/lib/")
-                    from bb.data_smart import DataSmart
-                `)
+        self.pyodide.runPython(
+`
+import sys
+sys.path.insert(0, "./bb/bitbake-${version}/lib/")
+from bb.data_smart import DataSmart
+
+import bb.parse
+import bb.siggen
+import tempfile
+
+def parsehelper(content, suffix = ".bb"):
+    f = tempfile.NamedTemporaryFile(suffix = suffix)
+    f.write(bytes(content, "utf-8"))
+    f.flush()
+    # os.chdir(os.path.dirname(f.name))
+    return f
+
+DOC = """
+A = "G"
+B = "C"
+C = "\${B} \${A}"
+
+"""
+
+with parsehelper(DOC) as f:
+    d = DataSmart()
+    bb.parse.siggen = bb.siggen.init(d)
+    d = bb.parse.handle(f.name, d)['']
+
+`)
 
         this.#initialized = true;
         this.#bitbakeVersion = version;
