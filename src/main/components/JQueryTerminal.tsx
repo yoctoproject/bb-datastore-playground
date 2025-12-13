@@ -31,7 +31,7 @@ interface Props {
     options?: JQueryTerminal.TerminalOptions
 }
 
-const BANNER = `Copyright (C) Agilent Technologies 2024`;
+const BANNER = `Copyright (C) Agilent Technologies 2024-2025`;
 
 export const JQueryTerminal: React.ForwardRefExoticComponent<React.PropsWithoutRef<Props> & React.RefAttributes<unknown>> = forwardRef(function JQueryTerminal(props: Props, ref) {
     const terminalContainerRef = useRef(null);
