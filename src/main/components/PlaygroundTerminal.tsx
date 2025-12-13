@@ -101,6 +101,11 @@ export const PlaygroundTerminal: React.FC<PlaygroundTerminalProps> = ({client}) 
                             term.error(text);
                         }
                     });
+
+                    const d = await client.parse('A = "1"');
+                    console.error(d);
+                    console.error(await d.getVar("A"));
+
                     term.setPrompt(prompt ?? PS1);
                     term.freeze(false);
                 };
