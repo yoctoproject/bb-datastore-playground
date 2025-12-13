@@ -11,7 +11,7 @@ interface WorkerData {
 const workers: {[uuid: string]: WorkerData} = {};
 
 export const createWorker = createAsyncThunk('data/createWorker', async () => {
-    const worker = new Worker(new URL("../../../pyodide-worker/worker.ts", import.meta.url));
+    const worker = new Worker(new URL("../../../pyodide-worker/worker.ts", import.meta.url), { type: "module" });
     const wrapped = Comlink.wrap<typeof MyWorker>(worker);
     const res = await new wrapped();
     const uuid = uuidv4();

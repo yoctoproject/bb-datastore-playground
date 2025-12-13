@@ -1,5 +1,6 @@
-import type {loadPyodide, PyodideInterface} from "pyodide";
-import {expose} from 'comlink'
+/// <reference lib="webworker" />
+import type { PyodideInterface } from "pyodide";
+import { expose } from 'comlink'
 
 import axios from "axios";
 
@@ -9,11 +10,12 @@ declare let self: DedicatedWorkerGlobalScope & {
     pyodide: PyodideInterface,
 }
 
-importScripts("https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js");
+const PYODIDE_MODULE_URL = "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.mjs";
+type LoadPyodide = typeof import("pyodide").loadPyodide;
 
 async function loadPyodideAndPackages() {
     console.log("loading pyodide");
-    // @ts-expect-error Method imported by importScripts
+    const { loadPyodide } = await import(PYODIDE_MODULE_URL) as { loadPyodide: LoadPyodide };
     self.pyodide = await loadPyodide();
     console.log("loading packages!");
     await self.pyodide.loadPackage(["sqlite3"]);
