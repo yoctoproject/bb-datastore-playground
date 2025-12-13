@@ -10,7 +10,7 @@ declare let self: DedicatedWorkerGlobalScope & {
     pyodide: PyodideInterface,
 }
 
-const PYODIDE_MODULE_URL = "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.mjs";
+const PYODIDE_MODULE_URL = "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.mjs";
 type LoadPyodide = typeof import("pyodide").loadPyodide;
 
 async function loadPyodideAndPackages() {
