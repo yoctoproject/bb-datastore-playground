@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": [
+      "ESNext",
+      "WebWorker",
+      "WebWorker.ImportScripts"
+    ]
+  },
+  "include": [
+    "src/pyodide-worker/**/*"
+  ]
+}
