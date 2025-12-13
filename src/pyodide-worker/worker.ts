@@ -15,7 +15,8 @@ type LoadPyodide = typeof import("pyodide").loadPyodide;
 
 async function loadPyodideAndPackages() {
     console.log("loading pyodide");
-    const { loadPyodide } = await import(PYODIDE_MODULE_URL) as { loadPyodide: LoadPyodide };
+    // @vite-ignore: dynamic CDN import
+    const { loadPyodide } = await import(/* @vite-ignore */ PYODIDE_MODULE_URL) as { loadPyodide: LoadPyodide };
     self.pyodide = await loadPyodide();
     console.log("loading packages!");
     await self.pyodide.loadPackage(["sqlite3"]);
