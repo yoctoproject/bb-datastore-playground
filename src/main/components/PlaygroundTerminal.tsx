@@ -100,6 +100,7 @@ export const PlaygroundTerminal: React.FC<PlaygroundTerminalProps> = ({
 
                     const { outputs, prompt } =
                         await client.runConsole(command);
+
                     outputs.forEach(({ type, text, newline }) => {
                         if (type === "stdout") {
                             term.echo(
@@ -116,6 +117,7 @@ export const PlaygroundTerminal: React.FC<PlaygroundTerminalProps> = ({
                     term.setPrompt(prompt ?? PS1);
                     term.freeze(false);
                 };
+
                 termHandle.setInterpreter(
                     interpreter as unknown as JQueryTerminal.Interpreter
                 );
