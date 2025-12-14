@@ -33,8 +33,11 @@ export const PlaygroundTerminal: React.FC<PlaygroundTerminalProps> = ({
     const terminalRef = useRef<TerminalHandle | null>(null);
     const setupComplete = useRef<boolean>(false);
 
-    const completionHandler = useMemo(
-        () => (command: string, callback: (result: string[]) => void) => {
+    const terminalOptions = useMemo(() => {
+        const completionHandler = (
+            command: string,
+            callback: (result: string[]) => void
+        ) => {
             client
                 .complete(command)
                 .then((completions) => callback(completions ?? []))
@@ -42,12 +45,9 @@ export const PlaygroundTerminal: React.FC<PlaygroundTerminalProps> = ({
                     console.warn("Completion failed", error);
                     callback([]);
                 });
-        },
-        [client]
-    );
+        };
 
-    const terminalOptions = useMemo(
-        () => ({
+        return {
             completionEscape: false,
             completion: completionHandler,
             keymap: {
@@ -78,9 +78,8 @@ export const PlaygroundTerminal: React.FC<PlaygroundTerminalProps> = ({
                     return original(event);
                 },
             },
-        }),
-        [completionHandler]
-    );
+        };
+    }, [client]);
 
     useEffect(() => {
         const termHandle = terminalRef.current;
