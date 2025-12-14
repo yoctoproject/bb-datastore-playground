@@ -2,13 +2,32 @@ import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { useDebounce } from "use-debounce";
+import {
+    compressToEncodedURIComponent,
+    decompressFromEncodedURIComponent,
+} from "lz-string";
 import { addNotification } from "../api/slices/notifications";
 import { selectEditorText, setText } from "../api/slices/editor";
 
 const QUERY_KEY = "code";
+const COMPRESSION_PREFIX = "z:";
 
-const encodeText = (text: string) => encodeURIComponent(text);
-const decodeText = (value: string) => decodeURIComponent(value);
+const encodeText = (text: string) => {
+    return `${COMPRESSION_PREFIX}${compressToEncodedURIComponent(text)}`;
+};
+
+const decodeText = (value: string) => {
+    const decompressed = decompressFromEncodedURIComponent(
+        value.slice(COMPRESSION_PREFIX.length)
+    );
+
+    if (decompressed === null) {
+        throw new Error("Failed to decompress value");
+    }
+
+    return decompressed;
+};
+
 const decodeQueryValue = (raw: string | null) => {
     if (!raw) {
         return "";
