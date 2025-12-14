@@ -4,7 +4,6 @@ import { AppLayout } from "./layout";
 import ToastManager from "./ToastManager";
 import { PyodideWorkerProvider } from "../hooks/usePyodideWorker";
 import { useEditorUrlSync } from "../hooks/useEditorUrlSync";
-import { EditorParseListener } from "./EditorParseListener";
 
 export const App: React.FC = () => {
     useEditorUrlSync();
@@ -12,7 +11,6 @@ export const App: React.FC = () => {
     return (
         <PyodideWorkerProvider>
             <ToastManager />
-            <EditorParseListener />
             <AppLayout />
         </PyodideWorkerProvider>
     );
