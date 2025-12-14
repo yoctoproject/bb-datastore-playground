@@ -1,5 +1,5 @@
-import {createSlice, PayloadAction} from "@reduxjs/toolkit";
-import type {RootState} from "../store";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { RootState } from "../store";
 
 export interface EditorState {
     text: string;
@@ -19,9 +19,7 @@ const editorSlice = createSlice({
     },
 });
 
-export const {
-    setText,
-} = editorSlice.actions;
-export const {reducer} = editorSlice;
+export const { setText } = editorSlice.actions;
+export const { reducer } = editorSlice;
 
 export const selectEditorText = (state: RootState) => state.editor.text;

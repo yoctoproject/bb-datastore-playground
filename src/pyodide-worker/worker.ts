@@ -1,22 +1,25 @@
 /// <reference lib="webworker" />
 import type { PyodideInterface } from "pyodide";
-import { proxy, expose } from 'comlink'
+import { proxy, expose } from "comlink";
 
 import axios from "axios";
 
-console.error("WORKER!")
+console.error("WORKER!");
 
 declare let self: DedicatedWorkerGlobalScope & {
-    pyodide: PyodideInterface,
-}
+    pyodide: PyodideInterface;
+};
 
-const PYODIDE_MODULE_URL = "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.mjs";
+const PYODIDE_MODULE_URL =
+    "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.mjs";
 type LoadPyodide = typeof import("pyodide").loadPyodide;
 
 async function loadPyodideAndPackages() {
     console.log("loading pyodide");
     // @vite-ignore: dynamic CDN import
-    const { loadPyodide } = await import(/* @vite-ignore */ PYODIDE_MODULE_URL) as { loadPyodide: LoadPyodide };
+    const { loadPyodide } = (await import(
+        /* @vite-ignore */ PYODIDE_MODULE_URL
+    )) as { loadPyodide: LoadPyodide };
     self.pyodide = await loadPyodide();
     console.log("loading packages!");
     await self.pyodide.loadPackage(["sqlite3"]);
@@ -25,12 +28,12 @@ async function loadPyodideAndPackages() {
 let progressCallbacks = [
     async (str) => {
         console.log(str);
-    }
+    },
 ];
 
 const printAll = async (str) => {
-    await Promise.all(progressCallbacks.map(f => f(str)));
-}
+    await Promise.all(progressCallbacks.map((f) => f(str)));
+};
 
 export class MyWorker {
     #initialized = false;
@@ -56,15 +59,17 @@ export class MyWorker {
         }
 
         const bitbakePromise = axios({
-            method: 'get',
+            method: "get",
             url: bitbakeUrl,
-            responseType: 'arraybuffer',
+            responseType: "arraybuffer",
             onDownloadProgress: async function (progressEvent) {
                 // Calculate the download progress percentage
-                const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total ?? 1));
+                const percentCompleted = Math.round(
+                    (progressEvent.loaded * 100) / (progressEvent.total ?? 1)
+                );
                 await printAll(`progress: ${percentCompleted}`);
-            }
-        }).then(response => response.data);
+            },
+        }).then((response) => response.data);
 
         const pyodidePromise = async () => {
             await printAll("starting!");
@@ -72,11 +77,14 @@ export class MyWorker {
             await printAll("done starting!");
         };
 
-        const [bitbakeData] = await Promise.all([bitbakePromise, pyodidePromise()]);
+        const [bitbakeData] = await Promise.all([
+            bitbakePromise,
+            pyodidePromise(),
+        ]);
 
         console.log("unpacking...");
         self.pyodide.unpackArchive(bitbakeData, "zip", {
-            extractDir: "bb"
+            extractDir: "bb",
         });
 
         console.log("applying import hooks...");
@@ -189,16 +197,17 @@ sys.meta_path.append(i)
 sys.meta_path.append(BuiltinImporterShim())
 
 print(sys.meta_path)
-        `)
+        `);
 
         self.pyodide.runPython(
-`
+            `
 import sys
 sys.path.insert(0, "./bb/bitbake-${version}/lib/")
 from bb.data_smart import DataSmart
 import bb.parse
 import bb.siggen
-`)
+`
+        );
 
         this.#initialized = true;
         this.#bitbakeVersion = version;
@@ -206,10 +215,10 @@ import bb.siggen
     }
 
     async parse(data: string) {
-        self.pyodide.FS.writeFile("/tmp.bb", data)
+        self.pyodide.FS.writeFile("/tmp.bb", data);
 
         const ret = await self.pyodide.runPython(
-`
+            `
 d = DataSmart()
 bb.parse.siggen = bb.siggen.init(d)
 d = bb.parse.handle("/tmp.bb", d)['']
@@ -231,7 +240,8 @@ d
             return;
         }
 
-        const {repr_shorten, PyodideConsole} = self.pyodide.pyimport("pyodide.console");
+        const { repr_shorten, PyodideConsole } =
+            self.pyodide.pyimport("pyodide.console");
         const pyconsole = PyodideConsole(self.pyodide.globals);
 
         const pyodideInternal = self.pyodide as unknown as {
@@ -260,7 +270,7 @@ d
 
               await_fut
               `,
-            {globals: namespace},
+            { globals: namespace }
         );
         namespace.destroy();
 
@@ -277,9 +287,15 @@ d
             await this.initConsole();
         }
         const pyconsole = this.#pyconsole;
-        const outputs: Array<{ type: "stdout" | "stderr"; text: string; newline?: boolean }> = [];
-        const echo = (text: string, newline = true) => outputs.push({type: "stdout", text, newline});
-        const errorOut = (text: string, newline = true) => outputs.push({type: "stderr", text, newline});
+        const outputs: Array<{
+            type: "stdout" | "stderr";
+            text: string;
+            newline?: boolean;
+        }> = [];
+        const echo = (text: string, newline = true) =>
+            outputs.push({ type: "stdout", text, newline });
+        const errorOut = (text: string, newline = true) =>
+            outputs.push({ type: "stderr", text, newline });
 
         // Match the original Pyodide console: stdout/stderr callbacks are responsible for newlines.
         pyconsole.stdout_callback = (s) => echo(s, false);
@@ -322,7 +338,7 @@ d
                     echo(
                         this.#repr_shorten.callKwargs(value, {
                             separator: "\n<long output truncated>\n",
-                        }),
+                        })
                     );
                 }
                 if (value instanceof self.pyodide.ffi.PyProxy) {
@@ -341,7 +357,7 @@ d
             }
         }
 
-        return {outputs, prompt: nextPrompt};
+        return { outputs, prompt: nextPrompt };
     }
 
     async complete(prefix: string): Promise<string[]> {

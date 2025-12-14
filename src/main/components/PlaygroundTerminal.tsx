@@ -1,12 +1,15 @@
-import {JQueryTerminal} from "./JQueryTerminal";
-import React, {useEffect, useMemo, useRef} from "react";
-import type {Remote} from "comlink";
-import type {MyWorker} from "../../pyodide-worker/worker";
+import { JQueryTerminal } from "./JQueryTerminal";
+import React, { useEffect, useMemo, useRef } from "react";
+import type { Remote } from "comlink";
+import type { MyWorker } from "../../pyodide-worker/worker";
 
 const PS1 = ">>> ";
 
 type TerminalHandle = {
-    echo: (message: string, options?: JQueryTerminal.animationOptions & JQueryTerminal.EchoOptions) => void;
+    echo: (
+        message: string,
+        options?: JQueryTerminal.animationOptions & JQueryTerminal.EchoOptions
+    ) => void;
     error: (message: string) => void;
     freeze: (toggle?: boolean) => void;
     setPrompt: (prompt: string) => void;
@@ -24,51 +27,60 @@ type PlaygroundTerminalProps = {
     client: Remote<MyWorker>;
 };
 
-export const PlaygroundTerminal: React.FC<PlaygroundTerminalProps> = ({client}) => {
+export const PlaygroundTerminal: React.FC<PlaygroundTerminalProps> = ({
+    client,
+}) => {
     const terminalRef = useRef<TerminalHandle | null>(null);
     const setupComplete = useRef<boolean>(false);
 
     const completionHandler = useMemo(
         () => (command: string, callback: (result: string[]) => void) => {
-            client.complete(command)
+            client
+                .complete(command)
                 .then((completions) => callback(completions ?? []))
                 .catch((error) => {
                     console.warn("Completion failed", error);
                     callback([]);
                 });
         },
-        [client],
+        [client]
     );
 
-    const terminalOptions = useMemo(() => ({
-        completionEscape: false,
-        completion: completionHandler,
-        keymap: {
-            "CTRL+C": () => {
-                const term = terminalRef.current;
-                if (!term) {
-                    return;
-                }
-                client.interrupt();
-                term.enter();
-                term.echo("KeyboardInterrupt");
-                term.setCommand("");
-                term.setPrompt(PS1);
-            },
-            TAB: (event: KeyboardEvent, original: (event: KeyboardEvent) => unknown) => {
-                const term = terminalRef.current;
-                if (!term) {
+    const terminalOptions = useMemo(
+        () => ({
+            completionEscape: false,
+            completion: completionHandler,
+            keymap: {
+                "CTRL+C": () => {
+                    const term = terminalRef.current;
+                    if (!term) {
+                        return;
+                    }
+                    client.interrupt();
+                    term.enter();
+                    term.echo("KeyboardInterrupt");
+                    term.setCommand("");
+                    term.setPrompt(PS1);
+                },
+                TAB: (
+                    event: KeyboardEvent,
+                    original: (event: KeyboardEvent) => unknown
+                ) => {
+                    const term = terminalRef.current;
+                    if (!term) {
+                        return original(event);
+                    }
+                    const command = term.beforeCursor?.() ?? "";
+                    if (command.trim() === "") {
+                        term.insert?.("\t");
+                        return false;
+                    }
                     return original(event);
-                }
-                const command = term.beforeCursor?.() ?? "";
-                if (command.trim() === "") {
-                    term.insert?.("\t");
-                    return false;
-                }
-                return original(event);
+                },
             },
-        },
-    }), [completionHandler]);
+        }),
+        [completionHandler]
+    );
 
     useEffect(() => {
         const termHandle = terminalRef.current;
@@ -87,14 +99,15 @@ export const PlaygroundTerminal: React.FC<PlaygroundTerminalProps> = ({client}) 
                         return;
                     }
 
-                    const {outputs, prompt} = await client.runConsole(command);
-                    outputs.forEach(({type, text, newline}) => {
+                    const { outputs, prompt } =
+                        await client.runConsole(command);
+                    outputs.forEach(({ type, text, newline }) => {
                         if (type === "stdout") {
                             term.echo(
                                 text
                                     .replaceAll("]]", "&rsqb;&rsqb;")
                                     .replaceAll("[[", "&lsqb;&lsqb;"),
-                                {newline: newline !== false},
+                                { newline: newline !== false }
                             );
                         } else {
                             term.error(text);
@@ -108,12 +121,16 @@ export const PlaygroundTerminal: React.FC<PlaygroundTerminalProps> = ({client}) 
                     term.setPrompt(prompt ?? PS1);
                     term.freeze(false);
                 };
-                termHandle.setInterpreter(interpreter as unknown as JQueryTerminal.Interpreter);
+                termHandle.setInterpreter(
+                    interpreter as unknown as JQueryTerminal.Interpreter
+                );
 
                 termHandle.setPrompt(PS1);
             } catch (err) {
                 const term = terminalRef.current;
-                term?.error(`Failed to initialize Pyodide console: ${String(err)}`);
+                term?.error(
+                    `Failed to initialize Pyodide console: ${String(err)}`
+                );
                 term?.freeze(false);
             }
         };
@@ -121,5 +138,5 @@ export const PlaygroundTerminal: React.FC<PlaygroundTerminalProps> = ({client}) 
         void bootstrap();
     }, [client]);
 
-    return (<JQueryTerminal ref={terminalRef} options={terminalOptions}/>)
-}
+    return <JQueryTerminal ref={terminalRef} options={terminalOptions} />;
+};

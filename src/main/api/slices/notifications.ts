@@ -1,13 +1,13 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 export interface NotificationMessage {
     id: number;
-    type: 'success' | 'error' | 'info';
+    type: "success" | "error" | "info";
     message: string;
 }
 
 interface NotificationsState {
-    messages: NotificationMessage[],
+    messages: NotificationMessage[];
 }
 
 const initialState: NotificationsState = {
@@ -15,7 +15,7 @@ const initialState: NotificationsState = {
 };
 
 const notificationsSlice = createSlice({
-    name: 'notifications',
+    name: "notifications",
     initialState,
     reducers: {
         addNotification(state, action) {
@@ -27,5 +27,6 @@ const notificationsSlice = createSlice({
     },
 });
 
-export const { addNotification, clearNotifications } = notificationsSlice.actions;
+export const { addNotification, clearNotifications } =
+    notificationsSlice.actions;
 export const { reducer } = notificationsSlice;

@@ -1,17 +1,22 @@
-import React, {useEffect, useRef} from "react";
-import {useSelector} from "react-redux";
-import {selectEditorText} from "../api/slices/editor";
-import {usePyodideWorker} from "../hooks/usePyodideWorker";
+import React, { useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
+import { selectEditorText } from "../api/slices/editor";
+import { usePyodideWorker } from "../hooks/usePyodideWorker";
 
 const PARSE_DEBOUNCE_MS = 600;
 
 export const EditorParseListener: React.FC = () => {
     const text = useSelector(selectEditorText);
-    const {client, status, prepared} = usePyodideWorker();
+    const { client, status, prepared } = usePyodideWorker();
     const timeoutRef = useRef<number | null>(null);
 
     useEffect(() => {
-        if (!client || status !== "ready" || !prepared || text.trim().length === 0) {
+        if (
+            !client ||
+            status !== "ready" ||
+            !prepared ||
+            text.trim().length === 0
+        ) {
             return;
         }
 

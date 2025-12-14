@@ -1,8 +1,8 @@
 // store.ts
 
-import {configureStore} from '@reduxjs/toolkit';
-import {reducer as notificationsReducer} from "./slices/notifications";
-import {reducer as editorReducer} from "./slices/editor";
+import { configureStore } from "@reduxjs/toolkit";
+import { reducer as notificationsReducer } from "./slices/notifications";
+import { reducer as editorReducer } from "./slices/editor";
 
 const store = configureStore({
     reducer: {

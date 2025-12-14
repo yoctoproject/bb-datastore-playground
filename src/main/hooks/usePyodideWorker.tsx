@@ -1,8 +1,20 @@
-import React, {createContext, useContext, useEffect, useMemo, useRef, useState} from "react";
-import {wrap, Remote} from "comlink";
-import {MyWorker} from "../../pyodide-worker/worker";
+import React, {
+    createContext,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
+import { wrap, Remote } from "comlink";
+import { MyWorker } from "../../pyodide-worker/worker";
 
-type PyodideWorkerStatus = "idle" | "starting" | "preparing" | "ready" | "error";
+type PyodideWorkerStatus =
+    | "idle"
+    | "starting"
+    | "preparing"
+    | "ready"
+    | "error";
 
 export type BitbakeSpec = {
     version: string;
@@ -19,7 +31,9 @@ type PyodideWorkerContextValue = {
 };
 
 const DEFAULT_BITBAKE_VERSION = "2.8.0";
-const PyodideWorkerContext = createContext<PyodideWorkerContextValue | null>(null);
+const PyodideWorkerContext = createContext<PyodideWorkerContextValue | null>(
+    null
+);
 
 const resolveBitbakeZipUrl = (spec: BitbakeSpec) => {
     const version = spec.version?.trim() || DEFAULT_BITBAKE_VERSION;
@@ -30,15 +44,21 @@ const resolveBitbakeZipUrl = (spec: BitbakeSpec) => {
     return `${base}assets/bitbake-${version}.zip`;
 };
 
-export const PyodideWorkerProvider: React.FC<{ children: React.ReactNode; bitbakeSpec?: BitbakeSpec }> = ({
-    children,
-    bitbakeSpec,
-}) => {
-    const normalizedSpec = useMemo<BitbakeSpec>(() => ({
-        version: bitbakeSpec?.version ?? DEFAULT_BITBAKE_VERSION,
-        url: bitbakeSpec?.url,
-    }), [bitbakeSpec?.url, bitbakeSpec?.version]);
-    const bitbakeZipUrl = useMemo(() => resolveBitbakeZipUrl(normalizedSpec), [normalizedSpec]);
+export const PyodideWorkerProvider: React.FC<{
+    children: React.ReactNode;
+    bitbakeSpec?: BitbakeSpec;
+}> = ({ children, bitbakeSpec }) => {
+    const normalizedSpec = useMemo<BitbakeSpec>(
+        () => ({
+            version: bitbakeSpec?.version ?? DEFAULT_BITBAKE_VERSION,
+            url: bitbakeSpec?.url,
+        }),
+        [bitbakeSpec?.url, bitbakeSpec?.version]
+    );
+    const bitbakeZipUrl = useMemo(
+        () => resolveBitbakeZipUrl(normalizedSpec),
+        [normalizedSpec]
+    );
 
     const [status, setStatus] = useState<PyodideWorkerStatus>("idle");
     const [error, setError] = useState<Error | null>(null);
@@ -53,7 +73,10 @@ export const PyodideWorkerProvider: React.FC<{ children: React.ReactNode; bitbak
         setStatus("starting");
         setError(null);
 
-        const worker = new Worker(new URL("../../pyodide-worker/worker.ts", import.meta.url), {type: "module"});
+        const worker = new Worker(
+            new URL("../../pyodide-worker/worker.ts", import.meta.url),
+            { type: "module" }
+        );
         workerRef.current = worker;
 
         const setup = async () => {
@@ -96,14 +119,17 @@ export const PyodideWorkerProvider: React.FC<{ children: React.ReactNode; bitbak
         };
     }, [bitbakeZipUrl]);
 
-    const value = useMemo<PyodideWorkerContextValue>(() => ({
-        status,
-        client: clientRef.current,
-        error,
-        bitbakeSpec: normalizedSpec,
-        bitbakeZipUrl,
-        prepared,
-    }), [bitbakeZipUrl, error, normalizedSpec, prepared, status]);
+    const value = useMemo<PyodideWorkerContextValue>(
+        () => ({
+            status,
+            client: clientRef.current,
+            error,
+            bitbakeSpec: normalizedSpec,
+            bitbakeZipUrl,
+            prepared,
+        }),
+        [bitbakeZipUrl, error, normalizedSpec, prepared, status]
+    );
 
     return (
         <PyodideWorkerContext.Provider value={value}>
@@ -115,7 +141,9 @@ export const PyodideWorkerProvider: React.FC<{ children: React.ReactNode; bitbak
 export const usePyodideWorker = () => {
     const ctx = useContext(PyodideWorkerContext);
     if (!ctx) {
-        throw new Error("usePyodideWorker must be used within a PyodideWorkerProvider");
+        throw new Error(
+            "usePyodideWorker must be used within a PyodideWorkerProvider"
+        );
     }
     return ctx;
 };

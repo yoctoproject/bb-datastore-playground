@@ -1,4 +1,4 @@
-# bb-datastore-playground 
+# bb-datastore-playground
 
 This project is under construction. It is just a proof-of-concept for now.
 

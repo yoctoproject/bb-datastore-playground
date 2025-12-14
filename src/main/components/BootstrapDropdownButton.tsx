@@ -1,19 +1,25 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
-import {Dropdown, DropdownMenu, DropdownProps, DropdownToggle} from "react-bootstrap";
-import {PropsFromToggle} from "react-bootstrap/DropdownToggle";
-import {BsPrefixProps, BsPrefixRefForwardingComponent} from "react-bootstrap/helpers";
-import {DropdownMenuVariant} from "react-bootstrap/DropdownMenu";
-import {alignPropType} from "react-bootstrap/types";
+import * as React from "react";
+import PropTypes from "prop-types";
+import {
+    Dropdown,
+    DropdownMenu,
+    DropdownProps,
+    DropdownToggle,
+} from "react-bootstrap";
+import { PropsFromToggle } from "react-bootstrap/DropdownToggle";
+import {
+    BsPrefixProps,
+    BsPrefixRefForwardingComponent,
+} from "react-bootstrap/helpers";
+import { DropdownMenuVariant } from "react-bootstrap/DropdownMenu";
+import { alignPropType } from "react-bootstrap/types";
 
 export interface BootstrapDropdownButtonProps
-    extends Omit<DropdownProps, 'title'>,
-        PropsFromToggle,
-        BsPrefixProps {
+    extends Omit<DropdownProps, "title">, PropsFromToggle, BsPrefixProps {
     title: React.ReactNode;
     menuRole?: string;
     renderMenuOnMount?: boolean;
-    rootCloseEvent?: 'click' | 'mousedown';
+    rootCloseEvent?: "click" | "mousedown";
     menuVariant?: DropdownMenuVariant;
     flip?: boolean;
 }
@@ -64,7 +70,7 @@ const propTypes = {
      *
      * Omitting this will use the default light color.
      */
-    menuVariant: PropTypes.oneOf<DropdownMenuVariant>(['dark']),
+    menuVariant: PropTypes.oneOf<DropdownMenuVariant>(["dark"]),
 
     /**
      * Allow Dropdown to flip in case of an overlapping on the reference element. For more information refer to
@@ -91,7 +97,7 @@ const propTypes = {
  * along with menu-related props are passed to the `Dropdown.Menu`
  */
 const BootstrapDropdownButton: BsPrefixRefForwardingComponent<
-    'div',
+    "div",
     BootstrapDropdownButtonProps
 > = React.forwardRef<HTMLDivElement, BootstrapDropdownButtonProps>(
     (
@@ -111,7 +117,7 @@ const BootstrapDropdownButton: BsPrefixRefForwardingComponent<
             flip,
             ...props
         },
-        ref,
+        ref
     ) => (
         <Dropdown ref={ref} {...props}>
             <DropdownToggle
@@ -135,10 +141,10 @@ const BootstrapDropdownButton: BsPrefixRefForwardingComponent<
                 {children}
             </DropdownMenu>
         </Dropdown>
-    ),
+    )
 );
 
-BootstrapDropdownButton.displayName = 'DropdownButton';
+BootstrapDropdownButton.displayName = "DropdownButton";
 BootstrapDropdownButton.propTypes = propTypes;
 
 export default BootstrapDropdownButton;

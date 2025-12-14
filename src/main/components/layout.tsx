@@ -1,11 +1,11 @@
-import {IJsonModel} from "flexlayout-react/src/model/IJsonModel";
-import {Layout, Model, TabNode} from "flexlayout-react";
+import { IJsonModel } from "flexlayout-react/src/model/IJsonModel";
+import { Layout, Model, TabNode } from "flexlayout-react";
 import React from "react";
-import {StatusPanel} from "./statusPanel";
-import {EditorWrapper} from "./editorPanel";
-import root from 'react-shadow';
-import {PlaygroundTerminal} from "./PlaygroundTerminal";
-import {usePyodideWorker} from "../hooks/usePyodideWorker";
+import { StatusPanel } from "./statusPanel";
+import { EditorWrapper } from "./editorPanel";
+import root from "react-shadow";
+import { PlaygroundTerminal } from "./PlaygroundTerminal";
+import { usePyodideWorker } from "../hooks/usePyodideWorker";
 
 import bootstrapStylesheetUrl from "bootstrap/dist/css/bootstrap.min.css?url";
 import mainStylesheetUrl from "../../styles/common.scss?url";
@@ -27,8 +27,8 @@ const json: IJsonModel = {
                         type: "tab",
                         name: "Editor",
                         component: "test",
-                    }
-                ]
+                    },
+                ],
             },
             {
                 type: "row",
@@ -42,8 +42,8 @@ const json: IJsonModel = {
                                 type: "tab",
                                 name: "Terminal",
                                 component: "terminal",
-                            }
-                        ]
+                            },
+                        ],
                     },
                     {
                         type: "tabset",
@@ -53,20 +53,19 @@ const json: IJsonModel = {
                                 type: "tab",
                                 name: "Status",
                                 component: "status_panel",
-                            }
-                        ]
-                    }
-                ]
+                            },
+                        ],
+                    },
+                ],
             },
-        ]
-    }
+        ],
+    },
 };
 
 const model = Model.fromJson(json);
 
-
 const LayoutWrapper = () => {
-    const {status, client, prepared} = usePyodideWorker();
+    const { status, client, prepared } = usePyodideWorker();
 
     const factory = (node: TabNode) => {
         const component = node.getComponent();
@@ -77,23 +76,23 @@ const LayoutWrapper = () => {
             if (!prepared || status !== "ready") {
                 return <div className="p-3">Pyodide is starting...</div>;
             }
-            return <PlaygroundTerminal client={client}/>;
+            return <PlaygroundTerminal client={client} />;
         } else if (component === "test") {
-            return <EditorWrapper/>;
+            return <EditorWrapper />;
         } else if (component === "status_panel") {
-            return <StatusPanel/>;
+            return <StatusPanel />;
         }
     };
 
     return (
         <div className="d-flex flex-column ps-2">
             <root.div className="vh-100">
-                <link href={bootstrapStylesheetUrl} rel="stylesheet"/>
-                <link href={mainStylesheetUrl} rel="stylesheet"/>
-                <link href={jqueryTerminalStylesheetUrl} rel="stylesheet"/>
-                <link href={flexLayoutStylesheetUrl} rel="stylesheet"/>
+                <link href={bootstrapStylesheetUrl} rel="stylesheet" />
+                <link href={mainStylesheetUrl} rel="stylesheet" />
+                <link href={jqueryTerminalStylesheetUrl} rel="stylesheet" />
+                <link href={flexLayoutStylesheetUrl} rel="stylesheet" />
                 <div className="position-relative vh-100 top-0 bottom-0">
-                    <Layout model={model} factory={factory}/>
+                    <Layout model={model} factory={factory} />
                 </div>
             </root.div>
         </div>
@@ -103,7 +102,7 @@ const LayoutWrapper = () => {
 export const AppLayout: React.FC = () => {
     return (
         <>
-            <LayoutWrapper/>
+            <LayoutWrapper />
         </>
-    )
-}
+    );
+};

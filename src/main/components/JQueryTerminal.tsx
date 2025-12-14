@@ -1,8 +1,13 @@
-import React, {forwardRef, useEffect, useImperativeHandle, useRef} from "react";
+import React, {
+    forwardRef,
+    useEffect,
+    useImperativeHandle,
+    useRef,
+} from "react";
 import $ from "jquery";
 import jqueryTerminalFactory from "jquery.terminal";
 
-import 'jquery.terminal/css/jquery.terminal.min.css';
+import "jquery.terminal/css/jquery.terminal.min.css";
 import jqueryTerminalStylesheetUrl from "jquery.terminal/css/jquery.terminal.min.css?url";
 
 type JQueryStatic = typeof $;
@@ -20,26 +25,34 @@ if (!globalScope.jQuery) {
     globalScope.jQuery = $;
 }
 
-const maybeInitTerminal = jqueryTerminalFactory as unknown as ((root?: typeof globalThis, jQuery?: JQueryStatic) => void) | undefined;
+const maybeInitTerminal = jqueryTerminalFactory as unknown as
+    | ((root?: typeof globalThis, jQuery?: JQueryStatic) => void)
+    | undefined;
 
 if (typeof maybeInitTerminal === "function") {
     maybeInitTerminal(globalScope, $);
 }
 
 interface Props {
-    interpreter?: TypeOrArray<JQueryTerminal.Interpreter>,
-    options?: JQueryTerminal.TerminalOptions
+    interpreter?: TypeOrArray<JQueryTerminal.Interpreter>;
+    options?: JQueryTerminal.TerminalOptions;
 }
 
 const BANNER = `Copyright (C) Agilent Technologies 2024-2025`;
 
-export const JQueryTerminal: React.ForwardRefExoticComponent<React.PropsWithoutRef<Props> & React.RefAttributes<unknown>> = forwardRef(function JQueryTerminal(props: Props, ref) {
+export const JQueryTerminal: React.ForwardRefExoticComponent<
+    React.PropsWithoutRef<Props> & React.RefAttributes<unknown>
+> = forwardRef(function JQueryTerminal(props: Props, ref) {
     const terminalContainerRef = useRef(null);
     const terminalObjectRef = useRef<JQueryTerminal>(null);
 
     useImperativeHandle(ref, () => {
         return {
-            echo: async (arg: string, options: JQueryTerminal.animationOptions & JQueryTerminal.EchoOptions) => {
+            echo: async (
+                arg: string,
+                options: JQueryTerminal.animationOptions &
+                    JQueryTerminal.EchoOptions
+            ) => {
                 if (terminalObjectRef.current) {
                     return terminalObjectRef.current.echo(arg, options);
                 }
@@ -75,22 +88,27 @@ export const JQueryTerminal: React.ForwardRefExoticComponent<React.PropsWithoutR
                 terminalObjectRef.current?.focus(silent);
             },
             getInstance: () => terminalObjectRef.current,
-            setInterpreter: (interpreter?: TypeOrArray<JQueryTerminal.Interpreter>) => {
+            setInterpreter: (
+                interpreter?: TypeOrArray<JQueryTerminal.Interpreter>
+            ) => {
                 if (terminalObjectRef.current) {
                     terminalObjectRef.current.set_interpreter(interpreter);
                 }
-            }
+            },
         };
     }, []);
 
     useEffect(() => {
         const obj: JQueryTerminal | null = terminalObjectRef.current;
 
-        terminalObjectRef.current = $(terminalContainerRef.current).terminal(props.interpreter, {
-            greetings: BANNER,
-            enabled: false,
-            ...props.options
-        });
+        terminalObjectRef.current = $(terminalContainerRef.current).terminal(
+            props.interpreter,
+            {
+                greetings: BANNER,
+                enabled: false,
+                ...props.options,
+            }
+        );
 
         const focusTerminal = () => {
             terminalObjectRef.current?.focus(true);
@@ -111,8 +129,8 @@ export const JQueryTerminal: React.ForwardRefExoticComponent<React.PropsWithoutR
 
     return (
         <>
-            <link href={jqueryTerminalStylesheetUrl} rel="stylesheet"/>
-            <div ref={terminalContainerRef} style={{height: '600px'}}></div>
+            <link href={jqueryTerminalStylesheetUrl} rel="stylesheet" />
+            <div ref={terminalContainerRef} style={{ height: "600px" }}></div>
         </>
     );
 });

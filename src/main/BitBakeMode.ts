@@ -6,11 +6,17 @@ import "ace-builds/src-noconflict/mode-sh";
 
 //ace.config.set('basePath', '/assets/ace-builds/src-noconflict')
 
-const TextHighlightRules = ace.require('ace/mode/text_highlight_rules').TextHighlightRules;
-const TextMode = ace.require("ace/mode/text").Mode
+const TextHighlightRules = ace.require(
+    "ace/mode/text_highlight_rules"
+).TextHighlightRules;
+const TextMode = ace.require("ace/mode/text").Mode;
 const PythonFoldMode = ace.require("ace/mode/folding/pythonic").FoldMode;
-const ShHighlightRules = ace.require("ace/mode/sh_highlight_rules").ShHighlightRules;
-const PythonHighlightRules = ace.require("ace/mode/python_highlight_rules").PythonHighlightRules;
+const ShHighlightRules = ace.require(
+    "ace/mode/sh_highlight_rules"
+).ShHighlightRules;
+const PythonHighlightRules = ace.require(
+    "ace/mode/python_highlight_rules"
+).PythonHighlightRules;
 
 export class BitBakeHighlightRules extends TextHighlightRules {
     constructor() {
@@ -18,12 +24,12 @@ export class BitBakeHighlightRules extends TextHighlightRules {
         const bitbakeIdentifierRegex = /[\w_][\w.\-+{}$:]*/;
 
         this.$rules = {
-            "start": [
+            start: [
                 {
                     // Comment - don't bother handling line continuation in comments
                     token: "comment",
                     regex: "#(.*)$",
-                    next: "start"
+                    next: "start",
                 },
                 {
                     // python task
@@ -58,17 +64,21 @@ export class BitBakeHighlightRules extends TextHighlightRules {
                     token: "variable",
                     regex: bitbakeIdentifierRegex,
                     next: "task_or_variable",
-                }
+                },
             ],
-            "task_or_variable": [
+            task_or_variable: [
                 {
                     token: "keyword.operator",
                     regex: /=|\?{1,2}=|=\+|\+=|:=|=:/,
                 },
                 {
                     // Varflag
-                    token: ["paren.lparen", "constant.character", "paren.rparen"],
-                    regex: /(\[)([-\w_+.]+)(])/
+                    token: [
+                        "paren.lparen",
+                        "constant.character",
+                        "paren.rparen",
+                    ],
+                    regex: /(\[)([-\w_+.]+)(])/,
                 },
                 {
                     token: "string",
@@ -83,19 +93,21 @@ export class BitBakeHighlightRules extends TextHighlightRules {
                 {
                     token: "paren.lparen",
                     regex: /\(/,
-                    push: [{
-                        token: "paren.rparen",
-                        regex: /\)/,
-                        next: "pop",
-                    }]
+                    push: [
+                        {
+                            token: "paren.rparen",
+                            regex: /\)/,
+                            next: "pop",
+                        },
+                    ],
                 },
                 {
                     token: "paren.lparen",
                     regex: /\{/,
                     next: "sh-start",
-                }
+                },
             ],
-            "directive": [
+            directive: [
                 {
                     token: "keyword",
                     regex: /(?:after|before)(?=\s)/,
@@ -109,9 +121,9 @@ export class BitBakeHighlightRules extends TextHighlightRules {
                     token: "text",
                     regex: /$/,
                     next: "start",
-                }
+                },
             ],
-            "unquoted_value": [
+            unquoted_value: [
                 {
                     token: ["text", "constant.language.escape"],
                     regex: /(.+?)(\\)$/,
@@ -120,12 +132,12 @@ export class BitBakeHighlightRules extends TextHighlightRules {
                     token: "text",
                     regex: /.+$/,
                     next: "start",
-                }
+                },
             ],
-            "python_task": [
+            python_task: [
                 {
                     token: "keyword",
-                    regex: /fakeroot(?=\s)/
+                    regex: /fakeroot(?=\s)/,
                 },
                 {
                     token: "entity.function",
@@ -134,19 +146,21 @@ export class BitBakeHighlightRules extends TextHighlightRules {
                 {
                     token: "paren.lparen",
                     regex: /\(/,
-                    push: [{
-                        token: "paren.rparen",
-                        regex: /\)/,
-                        next: "pop",
-                    }]
+                    push: [
+                        {
+                            token: "paren.rparen",
+                            regex: /\)/,
+                            next: "pop",
+                        },
+                    ],
                 },
                 {
                     token: "paren.lparen",
                     regex: /\{/,
                     next: "python-start",
-                }
+                },
             ],
-            "shell_task": [
+            shell_task: [
                 {
                     token: "entity.function",
                     regex: bitbakeIdentifierRegex,
@@ -154,34 +168,36 @@ export class BitBakeHighlightRules extends TextHighlightRules {
                 {
                     token: "paren.lparen",
                     regex: /\(/,
-                    push: [{
-                        token: "paren.rparen",
-                        regex: /\)/,
-                        next: "pop",
-                    }]
+                    push: [
+                        {
+                            token: "paren.rparen",
+                            regex: /\)/,
+                            next: "pop",
+                        },
+                    ],
                 },
                 {
                     token: "paren.lparen",
                     regex: /\{/,
                     next: "sh-start",
-                }
-            ]
+                },
+            ],
         };
 
         this.embedRules(PythonHighlightRules, "python-", [
             {
                 token: "paren.rparen",
                 regex: "^}$",
-                next: "start"
-            }
+                next: "start",
+            },
         ]);
 
         this.embedRules(ShHighlightRules, "sh-", [
             {
                 token: "paren.rparen",
                 regex: "^}$",
-                next: "start"
-            }
+                next: "start",
+            },
         ]);
 
         this.embedRules(PythonHighlightRules, "python-def-", [
@@ -189,8 +205,8 @@ export class BitBakeHighlightRules extends TextHighlightRules {
                 token: "text",
                 // A Python def function ends on the first non-indented line
                 regex: /^(?=\S)/,
-                next: "start"
-            }
+                next: "start",
+            },
         ]);
 
         this.normalizeRules();

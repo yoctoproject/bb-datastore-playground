@@ -1,8 +1,8 @@
-import React, {useEffect, useRef} from "react";
+import React, { useEffect, useRef } from "react";
 import BitBakeMode from "../../BitBakeMode";
 import AceEditor from "react-ace";
-import {useDispatch, useSelector} from "react-redux";
-import {selectEditorText, setText} from "../../api/slices/editor";
+import { useDispatch, useSelector } from "react-redux";
+import { selectEditorText, setText } from "../../api/slices/editor";
 
 export const EditorWrapper = () => {
     const dispatch = useDispatch();
@@ -13,12 +13,11 @@ export const EditorWrapper = () => {
         editor.current.editor.getSession().setMode(new BitBakeMode());
     }, []);
 
-
     useEffect(() => {
         if (editor.current) {
             editor.current.editor.renderer.attachToShadowRoot();
         }
-    })
+    });
 
     return (
         <div>
@@ -26,10 +25,10 @@ export const EditorWrapper = () => {
                 ref={editor}
                 mode="text"
                 theme="github"
-                editorProps={{$blockScrolling: true}}
+                editorProps={{ $blockScrolling: true }}
                 value={text}
                 onChange={(value: string) => dispatch(setText(value))}
             />
         </div>
     );
-}
+};

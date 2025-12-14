@@ -1,9 +1,9 @@
-import {useEffect, useRef} from "react";
-import {useDispatch, useSelector} from "react-redux";
-import {useSearchParams} from "react-router-dom";
-import {useDebounce} from "use-debounce";
-import {addNotification} from "../api/slices/notifications";
-import {selectEditorText, setText} from "../api/slices/editor";
+import { useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
+import { useDebounce } from "use-debounce";
+import { addNotification } from "../api/slices/notifications";
+import { selectEditorText, setText } from "../api/slices/editor";
 
 const QUERY_KEY = "code";
 
@@ -58,7 +58,15 @@ export const useEditorUrlSync = (debounceMs = 1000) => {
         // If we're currently applying URL -> store, wait until debounced store matches it
         if (hydratingRef.current) {
             const raw = searchParams.get(QUERY_KEY);
-            const decoded = raw ? (() => { try { return decodeText(raw); } catch { return null; } })() : "";
+            const decoded = raw
+                ? (() => {
+                      try {
+                          return decodeText(raw);
+                      } catch {
+                          return null;
+                      }
+                  })()
+                : "";
 
             if (decoded !== debouncedText) {
                 return;
