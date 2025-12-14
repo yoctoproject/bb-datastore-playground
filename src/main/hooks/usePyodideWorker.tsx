@@ -117,7 +117,7 @@ export const PyodideWorkerProvider: React.FC<{
             clientRef.current = null;
             setPrepared(false);
         };
-    }, [bitbakeZipUrl]);
+    }, [bitbakeZipUrl, normalizedSpec.version]);
 
     const value = useMemo<PyodideWorkerContextValue>(
         () => ({
