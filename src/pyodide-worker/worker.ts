@@ -220,13 +220,15 @@ import bb.siggen
 d = DataSmart()
 bb.parse.siggen = bb.siggen.init(d)
 d = bb.parse.handle("/tmp.bb", d)['']
-d
+str(d.getVar("A"))
 `
         );
 
         // More sorcery: use comlink to proxy the returned 'd', which itself
         // is actually a pyodide proxy.
-        return await proxy(ret);
+        // return await proxy(ret);
+
+        return ret;
     }
 
     // Terminal code largely taken from https://github.com/pyodide/pyodide/blob/main/src/templates/console.html

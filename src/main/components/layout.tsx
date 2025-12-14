@@ -6,6 +6,7 @@ import { EditorWrapper } from "./editorPanel";
 import root from "react-shadow";
 import { PlaygroundTerminal } from "./PlaygroundTerminal";
 import { usePyodideWorker } from "../hooks/usePyodideWorker";
+import { OutputPanel } from "./outputPanel";
 
 import bootstrapStylesheetUrl from "bootstrap/dist/css/bootstrap.min.css?url";
 import mainStylesheetUrl from "../../styles/common.scss?url";
@@ -38,6 +39,11 @@ const json: IJsonModel = {
                         type: "tabset",
                         weight: 60,
                         children: [
+                            {
+                                type: "tab",
+                                name: "Output",
+                                component: "output",
+                            },
                             {
                                 type: "tab",
                                 name: "Terminal",
@@ -83,6 +89,8 @@ const LayoutWrapper = () => {
             return <EditorWrapper />;
         } else if (component === "status_panel") {
             return <StatusPanel />;
+        } else if (component == "output") {
+            return <OutputPanel />;
         }
     };
 
