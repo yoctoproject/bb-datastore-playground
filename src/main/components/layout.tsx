@@ -73,6 +73,20 @@ const model = Model.fromJson(json);
 const LayoutWrapper = () => {
     const { workerState, getClient } = usePyodideWorker();
 
+    // const onRenderTabSet = (tabSetNode: TabSetNode | BorderNode, renderValues: ITabSetRenderValues) => {
+    //     renderValues.stickyButtons.push(
+    //         <button
+    //             key="custom-button"
+    //             onClick={() =>
+    //                 alert(`Button clicked for ${(tabSetNode.getChildren()[0] as TabNode).getName()}`)
+    //             }
+    //             title="Run"
+    //         >
+    //             Run
+    //         </button>
+    //     );
+    // };
+
     const factory = (node: TabNode) => {
         const component = node.getComponent();
         const client = getClient();
@@ -102,7 +116,11 @@ const LayoutWrapper = () => {
                 <link href={jqueryTerminalStylesheetUrl} rel="stylesheet" />
                 <link href={flexLayoutStylesheetUrl} rel="stylesheet" />
                 <div className="position-relative vh-100 top-0 bottom-0">
-                    <Layout model={model} factory={factory} />
+                    <Layout
+                        model={model}
+                        factory={factory}
+                        // onRenderTabSet={onRenderTabSet}
+                    />
                 </div>
             </root.div>
         </div>
