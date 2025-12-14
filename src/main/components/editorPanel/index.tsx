@@ -23,6 +23,7 @@ export const EditorWrapper = () => {
         <div>
             <AceEditor
                 ref={editor}
+                fontSize={16}
                 mode="text"
                 theme="github"
                 editorProps={{ $blockScrolling: true }}
