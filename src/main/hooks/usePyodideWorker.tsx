@@ -10,12 +10,12 @@ import React, {
 import { wrap, Remote } from "comlink";
 import { MyWorker } from "../../pyodide-worker/worker";
 
-type PyodideWorkerStatus =
-    | "idle"
-    | "starting"
-    | "preparing"
-    | "ready"
-    | "error";
+type WorkerState =
+    | { status: "idle" }
+    | { status: "starting" }
+    | { status: "preparing" }
+    | { status: "ready" }
+    | { status: "error"; error: Error };
 
 export type BitbakeSpec = {
     version: string;
@@ -23,12 +23,10 @@ export type BitbakeSpec = {
 };
 
 type PyodideWorkerContextValue = {
-    status: PyodideWorkerStatus;
+    workerState: WorkerState;
     getClient: () => Remote<MyWorker> | null;
-    error: Error | null;
     bitbakeSpec: BitbakeSpec;
     bitbakeZipUrl: string;
-    prepared: boolean;
 };
 
 const DEFAULT_BITBAKE_VERSION = "2.8.0";
@@ -61,9 +59,9 @@ export const PyodideWorkerProvider: React.FC<{
         [normalizedSpec]
     );
 
-    const [status, setStatus] = useState<PyodideWorkerStatus>("idle");
-    const [error, setError] = useState<Error | null>(null);
-    const [prepared, setPrepared] = useState<boolean>(false);
+    const [workerState, setWorkerState] = useState<WorkerState>({
+        status: "idle",
+    });
 
     const workerRef = useRef<Worker | null>(null);
     const clientRef = useRef<Remote<MyWorker> | null>(null);
@@ -72,8 +70,7 @@ export const PyodideWorkerProvider: React.FC<{
         let cancelled = false;
 
         const setup = async () => {
-            setStatus("starting");
-            setError(null);
+            setWorkerState({ status: "starting" });
             clientRef.current = null;
 
             const worker = new Worker(
@@ -91,8 +88,7 @@ export const PyodideWorkerProvider: React.FC<{
                 }
 
                 clientRef.current = api;
-                setStatus("preparing");
-                setPrepared(false);
+                setWorkerState({ status: "preparing" });
 
                 await api.prepareBitbake(bitbakeZipUrl, normalizedSpec.version);
 
@@ -100,15 +96,13 @@ export const PyodideWorkerProvider: React.FC<{
                     worker.terminate();
                     return;
                 }
-                setPrepared(true);
-                setStatus("ready");
+                setWorkerState({ status: "ready" });
             } catch (err) {
                 if (cancelled) {
                     return;
                 }
                 clientRef.current = null;
-                setError(err as Error);
-                setStatus("error");
+                setWorkerState({ status: "error", error: err as Error });
             }
         };
 
@@ -119,7 +113,7 @@ export const PyodideWorkerProvider: React.FC<{
             workerRef.current?.terminate();
             workerRef.current = null;
             clientRef.current = null;
-            setPrepared(false);
+            setWorkerState({ status: "idle" });
         };
     }, [bitbakeZipUrl, normalizedSpec.version]);
 
@@ -127,14 +121,12 @@ export const PyodideWorkerProvider: React.FC<{
 
     const value = useMemo<PyodideWorkerContextValue>(
         () => ({
-            status,
+            workerState,
             getClient,
-            error,
             bitbakeSpec: normalizedSpec,
             bitbakeZipUrl,
-            prepared,
         }),
-        [bitbakeZipUrl, error, getClient, normalizedSpec, prepared, status]
+        [bitbakeZipUrl, getClient, normalizedSpec, workerState]
     );
 
     return (

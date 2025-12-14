@@ -7,16 +7,16 @@ const PARSE_DEBOUNCE_MS = 600;
 
 export const EditorParseListener: React.FC = () => {
     const text = useSelector(selectEditorText);
-    const { getClient, status, prepared } = usePyodideWorker();
+    const { getClient, workerState } = usePyodideWorker();
     const timeoutRef = useRef<number | null>(null);
 
     useEffect(() => {
         const client = getClient();
+        const status = workerState.status;
 
         if (
             !client ||
             status !== "ready" ||
-            !prepared ||
             text.trim().length === 0
         ) {
             return;
@@ -42,7 +42,7 @@ export const EditorParseListener: React.FC = () => {
                 timeoutRef.current = null;
             }
         };
-    }, [getClient, prepared, status, text]);
+    }, [getClient, text, workerState]);
 
     return null;
 };

@@ -65,16 +65,17 @@ const json: IJsonModel = {
 const model = Model.fromJson(json);
 
 const LayoutWrapper = () => {
-    const { status, getClient, prepared } = usePyodideWorker();
+    const { workerState, getClient } = usePyodideWorker();
 
     const factory = (node: TabNode) => {
         const component = node.getComponent();
         const client = getClient();
+        const status = workerState.status;
         if (component === "terminal") {
             if (!client || status === "error") {
                 return <div className="p-3">Pyodide failed to start.</div>;
             }
-            if (!prepared || status !== "ready") {
+            if (status !== "ready") {
                 return <div className="p-3">Pyodide is starting...</div>;
             }
             return <PlaygroundTerminal client={client} />;
