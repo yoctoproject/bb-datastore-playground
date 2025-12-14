@@ -9,6 +9,17 @@ const QUERY_KEY = "code";
 
 const encodeText = (text: string) => encodeURIComponent(text);
 const decodeText = (value: string) => decodeURIComponent(value);
+const decodeQueryValue = (raw: string | null) => {
+    if (!raw) {
+        return "";
+    }
+
+    try {
+        return decodeText(raw);
+    } catch {
+        return null;
+    }
+};
 
 export const useEditorUrlSync = (debounceMs = 1000) => {
     const dispatch = useDispatch();
@@ -58,15 +69,7 @@ export const useEditorUrlSync = (debounceMs = 1000) => {
         // If we're currently applying URL -> store, wait until debounced store matches it
         if (hydratingRef.current) {
             const raw = searchParams.get(QUERY_KEY);
-            const decoded = raw
-                ? (() => {
-                      try {
-                          return decodeText(raw);
-                      } catch {
-                          return null;
-                      }
-                  })()
-                : "";
+            const decoded = decodeQueryValue(raw);
 
             if (decoded !== debouncedText) {
                 return;
