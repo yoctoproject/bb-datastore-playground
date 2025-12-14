@@ -40,6 +40,7 @@ export default [
       ...reactPlugin.configs.recommended.rules,
       ...reactHooksPlugin.configs.recommended.rules,
       ...youDontNeedLodashPlugin.configs.compatible.rules,
+      curly: ["error", "all"],
       "no-undef": "off",
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": "off",
