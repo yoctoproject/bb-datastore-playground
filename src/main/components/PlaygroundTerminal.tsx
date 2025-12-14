@@ -76,7 +76,6 @@ export const PlaygroundTerminal: React.FC<PlaygroundTerminalProps> = ({client}) 
             return;
         }
         setupComplete.current = true;
-        termHandle.freeze(true);
         termHandle.setPrompt("Preparing Pyodide...");
 
         const bootstrap = async () => {
@@ -87,7 +86,7 @@ export const PlaygroundTerminal: React.FC<PlaygroundTerminalProps> = ({client}) 
                     if (!term) {
                         return;
                     }
-                    term.freeze(true);
+
                     const {outputs, prompt} = await client.runConsole(command);
                     outputs.forEach(({type, text, newline}) => {
                         if (type === "stdout") {
@@ -112,8 +111,6 @@ export const PlaygroundTerminal: React.FC<PlaygroundTerminalProps> = ({client}) 
                 termHandle.setInterpreter(interpreter as unknown as JQueryTerminal.Interpreter);
 
                 termHandle.setPrompt(PS1);
-                termHandle.freeze(false);
-                termHandle.focus?.(false);
             } catch (err) {
                 const term = terminalRef.current;
                 term?.error(`Failed to initialize Pyodide console: ${String(err)}`);

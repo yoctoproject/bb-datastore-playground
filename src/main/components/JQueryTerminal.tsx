@@ -88,15 +88,16 @@ export const JQueryTerminal: React.ForwardRefExoticComponent<React.PropsWithoutR
 
         terminalObjectRef.current = $(terminalContainerRef.current).terminal(props.interpreter, {
             greetings: BANNER,
+            enabled: false,
             ...props.options
         });
+
         const focusTerminal = () => {
             terminalObjectRef.current?.focus(true);
         };
         const container = terminalContainerRef.current as HTMLElement | null;
         container?.addEventListener("mousedown", focusTerminal);
         container?.addEventListener("focusin", focusTerminal);
-        terminalObjectRef.current?.focus(true);
 
         return () => {
             container?.removeEventListener("mousedown", focusTerminal);
