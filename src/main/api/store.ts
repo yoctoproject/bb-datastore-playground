@@ -3,11 +3,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { reducer as notificationsReducer } from "./slices/notifications";
 import { reducer as editorReducer } from "./slices/editor";
+import { reducer as parseReducer } from "./slices/parse";
 
 const store = configureStore({
     reducer: {
         notifications: notificationsReducer,
         editor: editorReducer,
+        parse: parseReducer,
     },
 });
 
