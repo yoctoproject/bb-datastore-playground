@@ -57,6 +57,9 @@ export class MyWorker {
             return;
         }
 
+        const helpersPromise = fetch(
+            new URL("./my_helpers.py", import.meta.url)
+        ).then((res) => res.text());
         const bitbakePromise = axios({
             method: "get",
             url: bitbakeUrl,
@@ -76,9 +79,10 @@ export class MyWorker {
             await printAll("done starting!");
         };
 
-        const [bitbakeData] = await Promise.all([
+        const [bitbakeData, , helpersSource] = await Promise.all([
             bitbakePromise,
             pyodidePromise(),
+            helpersPromise,
         ]);
 
         console.log("unpacking...");
@@ -208,6 +212,18 @@ import bb.siggen
 `
         );
 
+        self.pyodide.FS.writeFile("/my_helpers.py", helpersSource);
+        self.pyodide.runPython(
+            `
+import importlib
+import sys
+if "/" not in sys.path:
+    sys.path.insert(0, "/")
+importlib.invalidate_caches()
+from my_helpers import segment_code, parsehelper
+`
+        );
+
         this.#initialized = true;
         await printAll("bitbake ready");
     }
@@ -217,10 +233,28 @@ import bb.siggen
 
         const ret = await self.pyodide.runPython(
             `
+import contextlib
+from pyodide.ffi import to_js
+import io
+
+ret = []
+with open("/tmp.bb", "r") as f:
+    segments = segment_code(f.read())
+
 d = DataSmart()
 bb.parse.siggen = bb.siggen.init(d)
-d = bb.parse.handle("/tmp.bb", d)['']
-str(d.getVar("A"))
+
+for segment in segments:
+    if segment[0] == "bitbake":
+        with parsehelper(segment[1]) as f:
+            d = bb.parse.handle(f.name, d)['']
+    elif segment[0] == "inline_python":
+        with contextlib.redirect_stdout(io.StringIO()) as f:
+            exec(segment[1])
+        ret.append(f.getvalue())
+
+print(ret)
+to_js(ret)
 `
         );
 
