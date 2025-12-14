@@ -13,6 +13,7 @@ const QUERY_KEY = "code";
 const COMPRESSION_PREFIX = "z:";
 
 const encodeText = (text: string) => {
+    // TODO: add some kind of checksum to end of data, in case URL gets corrupted?
     return `${COMPRESSION_PREFIX}${compressToEncodedURIComponent(text)}`;
 };
 
