@@ -20,7 +20,7 @@ export const EditorWrapper = () => {
     });
 
     return (
-        <div>
+        <div style={{ width: "100%", height: "100%" }}>
             <AceEditor
                 ref={editor}
                 fontSize={16}
@@ -29,6 +29,8 @@ export const EditorWrapper = () => {
                 editorProps={{ $blockScrolling: true }}
                 value={text}
                 onChange={(value: string) => dispatch(setText(value))}
+                width="100%"
+                height="100%"
             />
         </div>
     );
