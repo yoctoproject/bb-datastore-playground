@@ -65,6 +65,7 @@
     "react-shadow": "^20.5.0",
     "react-toastify": "^10.0.6",
     "sass-rem": "^4.0.0",
+    "use-debounce": "^10.0.6",
     "uuid": "^9.0.1"
   }
 }
