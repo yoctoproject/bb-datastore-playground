@@ -3,6 +3,7 @@ import React, {
     useContext,
     useEffect,
     useMemo,
+    useCallback,
     useRef,
     useState,
 } from "react";
@@ -23,7 +24,7 @@ export type BitbakeSpec = {
 
 type PyodideWorkerContextValue = {
     status: PyodideWorkerStatus;
-    client: Remote<MyWorker> | null;
+    getClient: () => Remote<MyWorker> | null;
     error: Error | null;
     bitbakeSpec: BitbakeSpec;
     bitbakeZipUrl: string;
@@ -63,9 +64,9 @@ export const PyodideWorkerProvider: React.FC<{
     const [status, setStatus] = useState<PyodideWorkerStatus>("idle");
     const [error, setError] = useState<Error | null>(null);
     const [prepared, setPrepared] = useState<boolean>(false);
-    const [client, setClient] = useState<Remote<MyWorker> | null>(null);
 
     const workerRef = useRef<Worker | null>(null);
+    const clientRef = useRef<Remote<MyWorker> | null>(null);
 
     useEffect(() => {
         let cancelled = false;
@@ -73,7 +74,7 @@ export const PyodideWorkerProvider: React.FC<{
         const setup = async () => {
             setStatus("starting");
             setError(null);
-            setClient(null);
+            clientRef.current = null;
 
             const worker = new Worker(
                 new URL("../../pyodide-worker/worker.ts", import.meta.url),
@@ -89,10 +90,7 @@ export const PyodideWorkerProvider: React.FC<{
                     return;
                 }
 
-                // Comlink proxies are callable functions, so use functional form
-                // to prevent React from treating this as an updater.
-                // https://react.dev/reference/react/useState#im-trying-to-set-state-to-a-function-but-it-gets-called-instead
-                setClient(() => api);
+                clientRef.current = api;
                 setStatus("preparing");
                 setPrepared(false);
 
@@ -108,7 +106,7 @@ export const PyodideWorkerProvider: React.FC<{
                 if (cancelled) {
                     return;
                 }
-                setClient(null);
+                clientRef.current = null;
                 setError(err as Error);
                 setStatus("error");
             }
@@ -120,21 +118,23 @@ export const PyodideWorkerProvider: React.FC<{
             cancelled = true;
             workerRef.current?.terminate();
             workerRef.current = null;
-            setClient(null);
+            clientRef.current = null;
             setPrepared(false);
         };
     }, [bitbakeZipUrl, normalizedSpec.version]);
 
+    const getClient = useCallback(() => clientRef.current, []);
+
     const value = useMemo<PyodideWorkerContextValue>(
         () => ({
             status,
-            client,
+            getClient,
             error,
             bitbakeSpec: normalizedSpec,
             bitbakeZipUrl,
             prepared,
         }),
-        [bitbakeZipUrl, client, error, normalizedSpec, prepared, status]
+        [bitbakeZipUrl, error, getClient, normalizedSpec, prepared, status]
     );
 
     return (

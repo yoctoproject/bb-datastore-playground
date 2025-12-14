@@ -65,10 +65,11 @@ const json: IJsonModel = {
 const model = Model.fromJson(json);
 
 const LayoutWrapper = () => {
-    const { status, client, prepared } = usePyodideWorker();
+    const { status, getClient, prepared } = usePyodideWorker();
 
     const factory = (node: TabNode) => {
         const component = node.getComponent();
+        const client = getClient();
         if (component === "terminal") {
             if (!client || status === "error") {
                 return <div className="p-3">Pyodide failed to start.</div>;
