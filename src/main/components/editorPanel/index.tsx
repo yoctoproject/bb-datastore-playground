@@ -7,7 +7,7 @@ import { selectEditorText, setText } from "../../api/slices/editor";
 export const EditorWrapper = () => {
     const dispatch = useDispatch();
     const text = useSelector(selectEditorText);
-    const editor = useRef(null);
+    const editor = useRef<AceEditor | null>(null);
 
     useEffect(() => {
         editor.current.editor.getSession().setMode(new BitBakeMode());
