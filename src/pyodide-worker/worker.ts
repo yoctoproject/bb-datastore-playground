@@ -37,7 +37,6 @@ const printAll = async (str) => {
 
 export class MyWorker {
     #initialized = false;
-    #bitbakeVersion: string | null = null;
     #pyconsole: any = null;
     // repr_shorten: pretty-printer used by Pyodide console to truncate long outputs.
     #repr_shorten: any = null;
@@ -210,7 +209,6 @@ import bb.siggen
         );
 
         this.#initialized = true;
-        this.#bitbakeVersion = version;
         await printAll("bitbake ready");
     }
 
