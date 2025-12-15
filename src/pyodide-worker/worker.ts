@@ -132,10 +132,10 @@ from my_helpers import segment_code, parsehelper
         await printAll("bitbake ready");
     }
 
-    async parse(data: string) {
+    async parse(data: string): Promise<Array<[string, string]>> {
         self.pyodide.FS.writeFile("/tmp.bb", data);
 
-        const ret = await self.pyodide.runPython(
+        const ret = (await self.pyodide.runPython(
             `
 import contextlib
 from pyodide.ffi import to_js
@@ -161,11 +161,7 @@ for segment in segments:
 print(ret)
 to_js(ret)
 `
-        );
-
-        // More sorcery: use comlink to proxy the returned 'd', which itself
-        // is actually a pyodide proxy.
-        // return await proxy(ret);
+        )) as Array<[string, string]>;
 
         return ret;
     }

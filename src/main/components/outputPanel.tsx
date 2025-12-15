@@ -25,11 +25,31 @@ export const OutputPanel: React.FC = () => {
     } else if (status === "failed") {
         content = <span className="text-danger">Error: {error}</span>;
     } else if (status === "succeeded") {
-        content = (
-            <pre className="bg-light p-2 rounded border">
-                {value ?? "(no value)"}
-            </pre>
-        );
+        if (value && value.length > 0) {
+            content = (
+                <div className="d-flex flex-column gap-3">
+                    {value.map(([code, output], idx) => (
+                        <div
+                            key={`${idx}-${code.substring(0, 10)}`}
+                            className="border rounded p-2 bg-white"
+                        >
+                            <div className="text-muted small mb-1">Python</div>
+                            <pre className="bg-light p-2 rounded border mb-2">
+                                {code.trimEnd()}
+                            </pre>
+                            <div className="text-muted small mb-1">Stdout</div>
+                            <pre className="bg-light p-2 rounded border mb-0">
+                                {output.trimEnd() || "(no output)"}
+                            </pre>
+                        </div>
+                    ))}
+                </div>
+            );
+        } else {
+            content = (
+                <span className="text-muted">No inline Python found.</span>
+            );
+        }
     } else {
         content = <span>...</span>;
     }

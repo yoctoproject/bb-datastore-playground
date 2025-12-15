@@ -7,9 +7,12 @@ type ParseStatus =
     | { kind: "succeeded" }
     | { kind: "failed"; error: string };
 
+export type ParseResultEntry = [code: string, output: string];
+export type ParseResult = ParseResultEntry[];
+
 type ParseState = {
     status: ParseStatus;
-    value: string | null;
+    value: ParseResult | null;
 };
 
 const initialState: ParseState = {
@@ -25,7 +28,7 @@ const parseSlice = createSlice({
             state.status = { kind: "parsing" };
             state.value = null;
         },
-        setParseSuccess(state, action: PayloadAction<{ value: string }>) {
+        setParseSuccess(state, action: PayloadAction<{ value: ParseResult }>) {
             state.status = { kind: "succeeded" };
             state.value = action.payload.value;
         },

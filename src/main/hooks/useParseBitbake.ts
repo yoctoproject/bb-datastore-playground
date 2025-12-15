@@ -52,7 +52,8 @@ export const useParseBitbake = () => {
                 }
                 dispatch(startParse());
                 const parseValue = await client.parse(debouncedText);
-                dispatch(setParseSuccess({ value: JSON.stringify(parseValue) }));
+
+                dispatch(setParseSuccess({ value: parseValue }));
             } catch (err) {
                 const message =
                     err instanceof Error ? err.message : "Unknown parse error";
