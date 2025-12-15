@@ -153,9 +153,10 @@ for segment in segments:
         with parsehelper(segment[1]) as f:
             d = bb.parse.handle(f.name, d)['']
     elif segment[0] == "inline_python":
+        # TODO: stderr as well
         with contextlib.redirect_stdout(io.StringIO()) as f:
             exec(segment[1])
-        ret.append(f.getvalue())
+        ret.append((segment[1], f.getvalue()))
 
 print(ret)
 to_js(ret)
