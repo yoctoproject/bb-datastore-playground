@@ -17,3 +17,5 @@ This site is a static web application. Python (and BitBake) run entirely in your
 
 A Web Worker is used (via <a href="https://github.com/GoogleChromeLabs/comlink">comlink</a>) to keep the UI responsive.
 
+## Credits
+Logo drawn by @jenisesc
