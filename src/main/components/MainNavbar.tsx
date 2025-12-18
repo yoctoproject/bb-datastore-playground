@@ -16,7 +16,7 @@ export const MainNavbar: React.FC = () => {
                         width="64"
                         height="64"
                         xmlns="http://www.w3.org/2000/svg"
-                        className="pe-3"
+                        className="me-2"
                     >
                         <image href={logoHref} height="64" width="64" />
                     </svg>{" "}
