@@ -56,7 +56,7 @@
         "idb": "^8.0.1",
         "immer": "^10.1.1",
         "jquery": "^3.7.1",
-        "jquery.terminal": "^2.44.1",
+        "jquery.terminal": "https://github.com/jcubic/jquery.terminal.git#162fa726cae9aba4d6a739e7d5a3533af0d2b2fe",
         "lz-string": "^1.5.0",
         "pyodide": "^0.29.0",
         "react": "^18.3.1",
